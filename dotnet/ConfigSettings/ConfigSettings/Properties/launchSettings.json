@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "ConfigSettings": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ConfigSetting_age": "18",
+        "ConfigSetting_name": "YufanInEnv",
+        "ConfigSetting_proxy:address": "envProxyAddress",
+        "ConfigSetting_proxy:port": "1234",
+        "ConfigSetting_proxy:ids:0": "0",
+        "ConfigSetting_proxy:ids:1": "1",
+        "ConfigSetting_proxy:ids:2": "2"
+      }
+    }
+  }
+}

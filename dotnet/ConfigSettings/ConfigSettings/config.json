@@ -1,0 +1,17 @@
+{
+  "exclude": [
+    "**/bin",
+    "**/bower_components",
+    "**/jspm_packages",
+    "**/node_modules",
+    "**/obj",
+    "**/platforms"
+  ],
+  "name": "Yufan",
+  "age": "44",
+  "proxy": {
+    "address": "abc",
+    "port": "80",
+    "ids": [3, 5, 8]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "ConfigService": {
+      "commandName": "Project"
+    }
+  }
+}
