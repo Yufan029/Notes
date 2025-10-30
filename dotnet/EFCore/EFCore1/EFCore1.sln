@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36603.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFCore1", "EFCore1\EFCore1.csproj", "{12784A2B-D015-4778-A64E-5326BB9BCFB8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneToMany", "OneToMany\OneToMany.csproj", "{AEC6FAE8-EBBC-417A-87DA-358674546048}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "自引用", "自引用\自引用.csproj", "{1910A6BF-D17E-4E3E-8985-2CCE0C6671F9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimisticConcurrency", "OptimisticConcurrency\OptimisticConcurrency.csproj", "{3F913397-D87E-4C97-8975-1125E3BD20EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiColumnsOptimisticConcurrency", "MultiColumnsOptimisticConcurrency\MultiColumnsOptimisticConcurrency.csproj", "{16C38C5B-5F32-48E8-85D3-1002F4C7EC00}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressionTree", "ExpressionTree\ExpressionTree.csproj", "{4B05F35A-731B-43A1-975C-18D43042290A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{12784A2B-D015-4778-A64E-5326BB9BCFB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12784A2B-D015-4778-A64E-5326BB9BCFB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12784A2B-D015-4778-A64E-5326BB9BCFB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12784A2B-D015-4778-A64E-5326BB9BCFB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEC6FAE8-EBBC-417A-87DA-358674546048}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEC6FAE8-EBBC-417A-87DA-358674546048}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEC6FAE8-EBBC-417A-87DA-358674546048}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEC6FAE8-EBBC-417A-87DA-358674546048}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1910A6BF-D17E-4E3E-8985-2CCE0C6671F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1910A6BF-D17E-4E3E-8985-2CCE0C6671F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1910A6BF-D17E-4E3E-8985-2CCE0C6671F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1910A6BF-D17E-4E3E-8985-2CCE0C6671F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F913397-D87E-4C97-8975-1125E3BD20EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F913397-D87E-4C97-8975-1125E3BD20EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F913397-D87E-4C97-8975-1125E3BD20EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F913397-D87E-4C97-8975-1125E3BD20EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16C38C5B-5F32-48E8-85D3-1002F4C7EC00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16C38C5B-5F32-48E8-85D3-1002F4C7EC00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16C38C5B-5F32-48E8-85D3-1002F4C7EC00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16C38C5B-5F32-48E8-85D3-1002F4C7EC00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B05F35A-731B-43A1-975C-18D43042290A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B05F35A-731B-43A1-975C-18D43042290A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B05F35A-731B-43A1-975C-18D43042290A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B05F35A-731B-43A1-975C-18D43042290A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FA92C4F2-7494-46DA-B512-767A643D82AC}
+	EndGlobalSection
+EndGlobal

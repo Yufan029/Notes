@@ -7,6 +7,7 @@ namespace ConfigSettings
     {
         static void Main(string[] args)
         {
+            // *****************************************************************************
             // 第一种方式，直接取
             /*
             ConfigurationBuilder configBuilder = new ConfigurationBuilder();
@@ -25,6 +26,8 @@ namespace ConfigSettings
             var config = configRoot.Get<Config>();
             Console.WriteLine($"config name = {config.Name}, age = {config.Age}, address = {config.Proxy.Address}");
             */
+
+            // *****************************************************************************
 
             // 第二种方式，用options，在DI container 里注册options
             /*
@@ -70,7 +73,9 @@ namespace ConfigSettings
             }
             */
 
-            // 第三种方式，commandline 传参数，参数扁平化处理
+            // *****************************************************************************
+
+            // 第三种方式，commandline, environment variables 传参数，参数扁平化处理
             // ConfigSettings.exe age=18 proxy:address="kasjlkjf" proxy:Port=23 proxy:ids:0=234 proxy:ids:2=54 proxy:ids:1=99
             // the parameter can be passed in visual studio project properties debug tab as well.
             ConfigurationBuilder builder = new ConfigurationBuilder();
