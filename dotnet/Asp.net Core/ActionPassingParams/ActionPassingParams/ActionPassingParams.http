@@ -1,0 +1,6 @@
+@ActionPassingParams_HostAddress = http://localhost:5087
+
+GET {{ActionPassingParams_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

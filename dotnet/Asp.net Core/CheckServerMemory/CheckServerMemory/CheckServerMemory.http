@@ -1,0 +1,6 @@
+@CheckServerMemory_HostAddress = http://localhost:5109
+
+GET {{CheckServerMemory_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

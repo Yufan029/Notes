@@ -143,6 +143,7 @@ FromSqlInterpolated 只支持单表查询，不可以 join， 包含所有的列
 ctx.Books.FromSqlInterpolated(@$"select \* from T_Books where DataPart(year, PubTime) > {year} order by newid()")
 
 执行任意 SQL
+```C#
 ctx.Database.GetDbConnection()获得 ADO.NET core 的数据库链接对象。
 DbConnection conn = ctx.Database.GetDbConnection();
 if (conn.State != ConnectionState.Open)
@@ -159,6 +160,7 @@ using (var cmd = conn.CreateCommand())
   cmd.Parameters.Add(pl);
   using（var reader = cmd.ExecuteReader())
 }
+```
 
 没有用 FromSqlInterpolated，是因为不想创建过多的实体（entity）类，并不需要在数据库中存储数据，可能只需要一个映射的类，但是导致 dbSet 膨胀。
 可以用 dapper 来操作，自动映射 raw sql 查询结果到类,并不是实体类，不用放入 dbContext
@@ -207,7 +209,7 @@ DbContext Entry(object) 得到 EntityEntry， EFCore 靠它跟踪对象。 Entit
           使用场景：
             简单系统，访问量不大，就可以用这个悲观并发控制
 
-        乐观（Optimistic Locking）- 并发令牌， EFCore提供
+        乐观（Optimistic Locking）- 并发令牌， EFCore提供 :smile:
           一个列的情况：
             原理：
               tom执行：
@@ -287,3 +289,40 @@ DbContext Entry(object) 得到 EntityEntry， EFCore 靠它跟踪对象。 Entit
   How to check in code:
     Install-Package ExpressionTreeToString
     e1.ToString("Object notation", "C#"); // case-sensitive
+
+
+- Asp.Net Core REST 落地
+1. RPC 风格： Users/AddNew, Users/GetAll, Users/DeleteById
+2. 可以cache的操作，GET。 Idempotent update 使用 PUT。Idempotent Delete => DELETE. 其他操作 POST.
+  POST安全，not idempotent网关不会重试，保守一些。
+3. 业务错误，返回合适的4XX, 报文体返回详细信息
+
+- 实现方式 （简单，快速，好用）：
+1. Add action annotation for Controller class, 优先根据路径匹配, RPC 风格
+```c#
+[Route("[controller]/[action]")]
+public class WeatherForecastController : ControllerBase {}
+```
+2. 不同操作，不同方法名
+3. 加[HttpGet], [HttpPost], [HttpDelete], [HttpPut]到对应的方法上
+
+- Action 方法
+1. 可以同步也可异步
+2. 异步Action方法一般不需要Async结尾，平台调用
+3. Action方法返回类型为普通类型 （例如自定义的Person类），返回结果默认为serialized Json
+4. 也可以返回 ActionResult<T>, 支持implicit conversion, 可以返回int, 也可以返回NotFound("id不存在");
+
+- 前端
+1. 安装Node.js
+2. 国内的话，需要npm镜像
+3. 安装yarn: npm install -g yarn
+4. 创建Vue项目: yarn create @vitejs/app ProjectName
+
+- 注册一个比较耗资源（耗时间）的服务，可以用builder.Services注册，然后在对应的方法中调用，不需要构造函数注册。
+  否则在使用其他方法时，DI也会调用并初始化需要使用的服务，从而浪费资源，我们可以在使用的方法中加入参数名的annotation
+```c#
+  public int Test([FromServices]TestService testService, int x)
+  {
+    return testService.Count; // 扫描一个目录，显示文件个数
+  }
+```
