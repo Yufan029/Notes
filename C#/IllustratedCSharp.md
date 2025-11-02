@@ -41,7 +41,8 @@ A template for creating data structures.
 
 decimal can represent decimal fractional numbers exactly. used for monetary calculations.
 
-dynamic - used when using assemblies written in dynamic languages.
+dynamic - used when using assemblies written in dynamic languages, like IronPython, IronRuby these are .NET languages as well, but they are dynamically typed.
+If a variable declared as dynamic, it will not do the type check in compile time, but package the info and operation together then trying to use it in run time, if cannot being run, throw exception.
 
 A running program uses two regions of memory to store data: *stack* & *heap*
 ![alt text](image-6.png)
