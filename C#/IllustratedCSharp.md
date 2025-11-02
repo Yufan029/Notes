@@ -31,3 +31,19 @@ Console.WriteLine("{0,-10:F4} -- Fixed Point, 4 dec places.", myDouble);     // 
 ![alt text](image-3.png)
 
 
+Chapter 4
+C - functions and data types
+C++ - functions and classes.
+C# - a set of type declarations
+
+What is type?
+A template for creating data structures.
+
+decimal can represent decimal fractional numbers exactly. used for monetary calculations.
+
+dynamic - used when using assemblies written in dynamic languages.
+
+A running program uses two regions of memory to store data: *stack* & *heap*
+![alt text](image-6.png)
+![alt text](image-5.png)
+> For any object of a reference type, all its data members are stored in the heap, regardless of whether they are of value type or reference type.
