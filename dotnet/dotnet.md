@@ -448,3 +448,32 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
   - 用法：
     1. 启用： `builder.Services.AddMemoryCache()`
     2. 注入 `IMemoryCache` 接口，使用方法：`TryGetValue()`, `Remove()`, `Set()`, `GetOrCreate()`, *`GetOrCreateAsync()`* (highly recommended)
+
+### 缓存的过期时间策略 ###
+  - 数据改变的时候调用 `Remove` 或者 `Set` 来删除或者修改缓存。（优点：及时。 缺点：写起来稍微麻烦点，需要在数据都被改动的地方 Remove / Set）
+  - 设置过期时间
+    - 绝对过期时间
+    ```c#
+      Book? b = await memoryCache.GetOrCreateAsync("Book" + id, async (e) => {
+        Console.WriteLine($"缓存里没找到，到数据库中查一查， id={id}");
+        e.AbsoluteExpirationRelativeToNow = TimeSpan.FromSecond(10);    // 设置缓存有效期10秒
+
+        return await MyDbContext.GetByIdAsync(id);
+      });
+
+    ```
+    - 滑动过期时间 (单独用的情况比较少见)
+    ```c#
+      // 在指定的时间段内，如果访问了，那缓存被续命了⨀_⨀。
+      // 从访问的时间开始，再加指定的时间。
+      // 如果没访问，在指定的时间之后，缓存过期。
+      e.SlidingExpiration = TimeSpan.FromSeconds(10);
+    ``` 
+
+    - 同时设置绝对和滑动
+      ```c#
+        e.AbsoluteExpirationRelativeToNow = TimeSpan.FromSecond(30);
+        e.SlidingExpiration = TimeSpan.FromSeconds(10);
+      ```
+      - 绝对时间 > 滑动时间
+        - 这样缓存会在绝对时间过期之前，随着访问被滑动续期，但是一旦超过绝对时间，缓存项就被删除了。
