@@ -8,6 +8,7 @@
 **/.vs/
 **/bin/
 **/wwwroot/
+dotnet/NETBookMaterials/
 
 # User-specific files
 *.rsuser

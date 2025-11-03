@@ -1,3 +1,6 @@
+### Project Code ###
+  - https://github.com/yangzhongke/NETBookMaterials
+
 ### Check the location of FileStream in different Assembly (.net framework, .net core, .net standard) ####
   - typeof(FileStream).Assemble.Location
 
@@ -360,10 +363,88 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
   }
 ```
 
->## drum up ##
+>### drum up ###
 > *drum up (something)* also *drum (something) up* 
 > - to get or create (support, business, etc.) through hard work and a lot of effort
 > - to try hard to get support or business
 > - 竭力争取（支持）； 兜揽（生意）
 > - They sent out flyers to drum up support for their candidate.
 > - He had flown to the north of the country to drum up support for the campaign.
+
+
+### Part4-22 各项目自己注册DI ###
+- 问题：
+  - 如果需要 DI 注册， 那其他项目里的服务就要全部被 `program.cs` 所在的项目引用，然后调用 `builder.Services.AddScope<Class123>();`
+
+- 解决：
+  - 利用作者这个包可以每个项目自己注册需要的服务。
+  - https://github.com/yangzhongke/NETBookMaterials/tree/main/%E6%9C%80%E5%90%8E%E5%A4%A7%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81/YouZack-VNext/Zack.Commons
+
+- 要能做到会用，而且懂原理，如何实现
+  - 反射 reflection
+  - Extension method
+
+### Part4-23~31 缓存 ###
+- 概念
+  - 缓存命中, hit
+  - 缓存命中率, ratio
+  - 缓存数据不一致, invalid
+  - 多级缓存
+
+- 客户端响应缓存 (app / browser)
+  - RFC7324 http 协议
+  - cache-control
+    - 服务器如果返回 cache-control:max-age=60,
+      - 表示服务器指示客户端 **可以** 缓存这个相应60秒。客户端**可以**选择不
+  
+  - 实现
+  ```c#
+    public class TestController : ControllerBase
+    {
+      [ResponseCache(Duration=20)]    // This is the attribute to use for setting the cache
+      [HttpGet]
+      pubic DateTime Now()
+      {
+        return DateTime.Now;
+      }
+    }
+  ```
+
+- 服务器端响应缓存，缓存中间件 （鸡肋，不推荐用）
+  - 优点：
+    - 多个客户端可以利用同一个缓存
+  
+  - 缺点：
+    - 响应状态码为200的GET或者HEAD请求才能被缓存
+    - 报文头中不能含有Authorization, Set-Cookie等。
+    - 客户端可以通过设置`cache-control: no-cache`来强制服务器不缓存，恶意攻击。
+
+  - 解决：
+    - 内存缓存
+    - 分布式缓存
+
+  - 实现：
+    ```c#
+      app.UseCors();
+
+      // 启用服务器端缓存
+      // 要在 MapController 之前， UseCors 之后。
+      app.UseResponseCaching();  
+
+      app.MapController();
+    ```
+
+  -- 测试：
+    - 打开两个浏览器，分别get DataTime.Now.
+    - 他们拿到的时间时一致的，如果服务器缓存开启。
+  
+
+### 当浏览器端设置 ###
+  - `cache-control: no-cache`
+  - 服务器端无论设置，客户端还是服务器端缓存，均不起作用了。
+
+### 内存缓存 (In-Memory cache) ###
+  - 键值对，dictionary
+  - 用法：
+    1. 启用： `builder.Services.AddMemoryCache()`
+    2. 注入 `IMemoryCache` 接口，使用方法：`TryGetValue()`, `Remove()`, `Set()`, `GetOrCreate()`, *`GetOrCreateAsync()`* (highly recommended)
