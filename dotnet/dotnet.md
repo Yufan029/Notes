@@ -477,3 +477,62 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
       ```
       - 绝对时间 > 滑动时间
         - 这样缓存会在绝对时间过期之前，随着访问被滑动续期，但是一旦超过绝对时间，缓存项就被删除了。
+
+### 缓存穿透 ###
+  - 没有命中缓存，每次都访问数据库
+  - 解决方法：
+    - 把“查不到”也当成一个数据放入缓存。
+    - 用 `GetOrCreateAsync()` 方法即可。
+
+### 缓存雪崩 ###
+  - 如果缓存时间设置成5秒，那么缓存项集中过期可能引起缓存雪崩，每隔5秒数据库访问高发，有可能压垮
+  - 解决方法：
+    - 在基础过期时间上，再加一个随机的过期时间。
+    ```c#
+      e.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(Random.Shared.Next(10, 15));
+    ```
+    - 不要用 `new Random().Next()`，因为高频访问的时候有可能生成的随机数时固定的。
+    - .NET 6 在`Random` 类里增加了 `Shared` 静态对象，相当于一个全局的，随机的 `Random` 对象。
+
+### 缓存数据混乱 ###
+  - 解决方法：
+    - 合理设置 `key`
+
+### IEnumerable 陷阱 ###
+  - What's the output?
+    ```c#
+      var items = GetItems();
+      Console.WriteLine("Ok");
+
+      foreach (var e in items)
+      {
+        Console.WriteLine(e);
+      }
+
+      IEnumerable<int> GetItems()
+      {
+        yield return 1;
+        yield return 2;
+        yield return 3;
+        Console.WriteLine("666");
+        yield return 4;
+        yield return 5;
+      }
+    ```
+
+  - 输出结果：先打印Ok，再打印 666
+    ```console
+      Ok
+      1
+      2
+      3
+      666
+      4
+      5
+    ```
+  
+  - 因为 `GetItems()` 并没有直接执行并返回结果。如果加一个 `ToArray()` 就可以直接拿到结果了，会先打印666，再打印Ok。
+
+  - 所以，如果在缓存中如果存储的时 `IQueryable` or `IEnumerable` 就可能存在***延迟***加载的问题。
+  - 如果把这两种类型的变量所指向的对象存入缓存，当取出来的时候，如果他们延迟加载时需要的对象(*dbContext*)已经被释放，就会执行失败了。
+  - 因此，缓存应禁止使用这两种类型，用 `List` etc.
