@@ -39,26 +39,30 @@ Console.WriteLine("{0,-10:F4} -- Fixed Point, 4 dec places.", myDouble);     // 
 ![alt text](image-3.png)
 
 
-## Chapter 4##
-C    - functions and data types
+## Chapter 4 ##
+- C    - functions and data types
 
-C++  - functions and classes.
+- C++  - functions and classes.
 
-C#   - a set of type declarations
+- C#   - a set of type declarations
 
 
-1. What is type?
-    - A template for creating data structures.
+- What is type?
+  - A template for creating data structures.
+    ![alt text](image-7.png)
 
-2. decimal can represent decimal fractional numbers exactly. used for monetary calculations.
+- decimal can represent decimal fractional numbers exactly. used for monetary calculations.
 
-3. dynamic 
-    - Used when using assemblies written in dynamic languages,
-    - Like IronPython, IronRuby these are .NET languages as well, but they are dynamically typed.
-    - If a variable declared as dynamic, it will not do the type check in compile time, 
-    - But package the info and operation together then trying to use it in run time, if cannot be run, throw exception.
+- dynamic 
+  - Used when using assemblies written in dynamic languages,
+  - Like IronPython, IronRuby these are .NET languages as well, but they are dynamically typed.
+  - If a variable declared as dynamic, it will not do the type check in compile time, 
+  - But package the info and operation together then trying to use it in run time, if cannot be run, throw exception.
 
-A running program uses two regions of memory to store data: ***stack*** & ***heap***
+- A running program uses two regions of memory to store data: ***stack*** & ***heap***
 ![alt text](image-6.png)
 ![alt text](image-5.png)
 > For any object of a reference type, all its data members are stored in the heap, regardless of whether they are of value type or reference type.
+
+## Chapter 5 ##
+> A running program is a set of objects interacting with each other.

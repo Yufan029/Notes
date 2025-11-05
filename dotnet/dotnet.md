@@ -535,4 +535,48 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
 
   - 所以，如果在缓存中如果存储的时 `IQueryable` or `IEnumerable` 就可能存在***延迟***加载的问题。
   - 如果把这两种类型的变量所指向的对象存入缓存，当取出来的时候，如果他们延迟加载时需要的对象(*dbContext*)已经被释放，就会执行失败了。
-  - 因此，缓存应禁止使用这两种类型，用 `List` etc.
+  - 因此，缓存应禁止使用这两种类型，用 `List` or `Array` etc.
+
+### 分布式缓存 ###
+  - 如果系统访问量大。
+  - Web服务器非常多。
+  - 无法跨集群节点获取缓存，每个服务器需要分别管理自身的缓存。
+
+  - 由于节点数量太多，造成数据库压力非常大，才引用分布式缓存，
+  - 一般情况下用内存缓存就挺好，内存缓存效率高，用的简单，部署简单。
+  - 除非必要，否则不需要使用分布式缓存。
+
+  - 如何实现，逻辑上一台缓存服务器
+  ![alt text](image.png)
+
+  - 常用的缓存服务器
+    - Redis
+    - Memcached
+    - .NET 提供了统一的分布式缓存服务器接口 `IDistributedCache`
+
+    |             | 内存缓存    | 分布式缓存 |
+    | ----------- |   :---:    |    :---:  |
+    | 数据类型     | 没有限制    |   byte[] |
+  
+  - 用什么？
+    - SQLServer，做缓存，性能不好。
+    - Memcached
+      - 缓存专用，性能好
+      - 但是集群，高可用稍弱
+      - 缓存健长度需小于250字节
+    - Redis (✓)
+      - 不局限用于缓存，可以存`list`, `sorted list`, 经纬度 etc.
+      - 比Memcached性能稍差
+      - 但高可用，并发，集群非常强大。
+      - 适合数据量大，高可用性等场合。
+      - `.NET` 官方开发了用redis的包
+  
+  - 如何安装
+    - NuGet: `Microsoft.Extensions.Caching.StackExchangeRedis`
+    - 注册服务：
+      ```c#
+        builder.Services.AddStackExchangeRedisCache(opt => {
+          opt.Configuration = "localhost";
+          opt.InstanceName = "cache1_";        // 前缀，便于区分
+        })
+      ```
