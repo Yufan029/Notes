@@ -580,3 +580,91 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
           opt.InstanceName = "cache1_";        // 前缀，便于区分
         })
       ```
+    - 自己封装的
+      - https://github.com/yangzhongke/NETBookMaterials/blob/main/%E6%9C%80%E5%90%8E%E5%A4%A7%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81/YouZack-VNext/Zack.ASPNETCore/DistributedCacheHelper.cs
+
+### ASP.NET Core与配置系统的集成 ###
+- 读取环境变量值
+  - In Programs.cs
+    ```c#
+      Console.WriteLine(app.Environment.EnvironmentName);
+      Console.WriteLine(app.Environment.IsDevelopment());
+      Console.WriteLine(app.Environment.IsProduction());
+    ```
+
+  - In controller
+    ```c#
+      [HttpGet]
+      public string Demo()
+      {
+        return Environment.GetEnvironmentVariable("haha");
+      }
+    ```
+  - 另一种方法，在controller里，可以在构造函数中注入 `IWebHostEnvironemnt` 就可以了
+    ```c#
+      public TestController(IWebHostEnvironment webEnv)
+      {
+        this.webEnv = webEnv;
+      }
+
+      [HttpGet]
+      public string Demo()
+      {
+        return webEnv.EnvironmentName;
+      }
+    ```
+
+### asp.net core 防止机密信息外泄 ###
+- ***user secrets***
+
+### Part4-38 ###
+- 面向切面变成 (AOP - Aspect-Oriented Programming)
+  - 把程序中“横切关注点”(cross-cutting concerns)从业务逻辑中分离出来。
+  - 把无关业务逻辑的代码从业务逻辑代码中分离出来，使业务逻辑更清晰。
+  - filter 是微软实现的一种，还有AspectCore， PostSharp
+
+- 什么是 cross-cutting concerns
+  - 在一个系统中，有些功能不属于莫格具体业务逻辑，但会出现在很多地方：
+    - Logging
+    - Exception Handling
+    - Authorization
+    - Performance Monitoring
+    - Transaction Management
+
+- AOP的思想就是：
+  - 把这些 "cross-cutting concerns" 的逻辑，抽出来单独定义成 ***切面*** (Aspect)，然后用生命的方式（如注解，配置）让它在需要的地方自动执行。
+  - 这样业务代码就***更干净***，只关注业务逻辑。
+
+### Part4-40 自动启用transaction的ActionFilter ###
+- 数据库的transaction
+  - 要么全部成功，要么全部失败。
+
+- EF Core
+  - `TransactionScope`
+    - transactionScope impelement the IDisposible, 如果TransactionScope的对象没有调用`Complete()`就执行了`Dispose()`，则transaction会被回滚，否则提交。
+    - 支持嵌套
+      - 只要最外层的transaction回滚了，内嵌的任何transaction即使提交了也会回滚。
+  ```c#
+    [HttpPost]
+    public string Test1()
+    {
+      using (var tx = new TransactionScope())
+      {
+        ctx.Books.AddJson(new Book { Name = "aa", Price = 1 });
+        ctx.SaveChanges();  // 一个事务(transaction)
+
+        ctx.Persons.Add(new Person { Name = "longNameeeeeee", Age = 18 });      // 设置数据库Person表中Name字段长度为3.
+        ctx.SaveChanges());   // 一个事务(transaction)
+
+        tx.Complete();
+        return "ok";
+      }
+    }
+  ```
+
+    - 异步代码，创建`TransactionScope`的时候需要传`TransactionScopeAsyncFlowOption.Enabled`
+
+    - 原理keyword: `TransactionScope`, `ThreadLocal`, `AsyncLocal`
+
+- 如果需要在controller的每个`action`方法中都实现`TransactionScope`，就可以用`ActionFilter`来实现
+  - https://github.com/yangzhongke/NETBookMaterials/tree/main/%E7%AC%AC%E4%B8%83%E7%AB%A0/%E8%87%AA%E5%8A%A8%E5%90%AF%E7%94%A8%E4%BA%8B%E5%8A%A1%E7%9A%84%E7%AD%9B%E9%80%89%E5%99%A8
