@@ -14,7 +14,7 @@ namespace CalculateDuration
             var duration = 0;
             foreach (var info in list)
             {
-                if (info.Cid < 359478081)
+                if (info.Cid >= 479283958)
                 {
 
                     duration += info.Duration;

@@ -668,3 +668,90 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
 
 - 如果需要在controller的每个`action`方法中都实现`TransactionScope`，就可以用`ActionFilter`来实现
   - https://github.com/yangzhongke/NETBookMaterials/tree/main/%E7%AC%AC%E4%B8%83%E7%AB%A0/%E8%87%AA%E5%8A%A8%E5%90%AF%E7%94%A8%E4%BA%8B%E5%8A%A1%E7%9A%84%E7%AD%9B%E9%80%89%E5%99%A8
+
+- 请求限流器
+  - https://github.com/yangzhongke/NETBookMaterials/tree/main/%E7%AC%AC%E4%B8%83%E7%AB%A0/%E8%AF%B7%E6%B1%82%E9%99%90%E6%B5%81%E5%99%A8
+
+### Part4-44 中间件类 ###
+- constructor needs to have `RequestDelegate` parameter
+  ```c#
+    public CheckMiddleware(RequestDelegate next)
+    {
+      this.next = next;
+    }
+  ```
+
+- Class needs to have `Invoke` or `InvokeAsync` method, and `HttpContext context` as the parameter, and reture `Task`
+```c#
+  public async Task InvokeAsync(HttpContext context) { ... }
+```
+
+- `Context.Items` can be used for passing through data between middlewares.
+
+### Part4-45 自己手动模仿 Web API 中间件 ###
+- https://github.com/yangzhongke/NETBookMaterials/tree/main/%E7%AC%AC%E4%B8%83%E7%AB%A0/MiniWebAPIDemo1
+
+### Part4-46 Markdown 解析器 ###
+
+- 优先使用中间件
+- 如果这个组件只是针对MVC或者需要调用一些MVC相关的类的时候，（例如需要得到`controller`的名字，`action`的名字），我们就需要用Filter
+- 可以把`filter`理解成MVC中的小中间件
+
+### JWT ###
+- user info stores on user computer
+- Server sign and pass the JWT to the client
+- The client send the request along with the JWT
+- Server verify it to authenticate user.
+
+### Multi-thread / Task / Parallel / async, await ###
+- 在 dotnet （2025/11/20），99%的时候应该使用 `async/await`, 只有在你需要 `cup-bound`的密集型工作时，才使用`Task.Run`, 而 `Parallel` 用于大批量CPU密集计算。 `Thread` 几乎不用自己创建。
+
+- `async/await`
+  - 高并发
+  - UI
+  - IO-bound
+  - 不创建线程，让线程池更高效
+  - 开销少，可扩展性高
+  - 代码应该默认用`async/await`, 除非你知道自己需要CPU计算
+
+- `Task.Run` 仅用于`CPU-bound`的工作
+  - 非IO操作，纯计算。
+  - 需要在`Async`方法里，跑一段`CPU-bound`代码
+  - 不要用
+    - ***不要用 Task.Run 包 IO***
+    ```c#
+      await Task.Run(() => httpClient.GetStringAsync(url));
+    ```
+
+- `Parallel.For / Parallel.ForEach`
+  - 百万数据
+  - 不需要async
+  - CPU-bound且可并行处理
+
+- `Channels / IAsyncEnumerable` （生产者-消费者模型）
+  - 高吞吐消息队列
+  - 实时数据流
+  - 服务端多并发pipeline
+  - 替代`BlockingCollection`（已过时）
+
+- 不要主动使用`Thread / ThreadPool / BackgroundWorker`
+  - 不够智能
+  - 无法自动复用线程
+  - 错误处理难
+  - 代码复杂
+
+- 不再推荐的旧技术
+  - BlockingCollection（用 Channel 替代）
+  - Task.Factory.StartNew（用 Task.Run）
+  - ContinueWith（用 async/await）
+  - Thread.Suspend / Resume（危险）
+  - ManualResetEvent / AutoResetEvent（除非底层代码）
+
+### part 5-5 JWT ###
+- JWT
+  - 三部分
+    - header
+    - payload
+    - signature
+  - 其中`header` 和 `payload` 是明文，可以通过编码解析出来，网上有线程的算法
+  - 不要把不希望被客户端知道信息放到JWT中

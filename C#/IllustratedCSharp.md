@@ -155,3 +155,172 @@ Console.WriteLine("{0,-10:F4} -- Fixed Point, 4 dec places.", myDouble);     // 
 ### Stack Frames ###
 - When a method is called, memory is allocated at the top of the stack to hold a number of data items associated with the method.
 - This chunk of memory is called the *stack frame* for the method.
+
+## Chapter 7 More About Classes ##
+- public static int MaxVal;
+- static public int MaxVal;
+    - These are the same, `public` and `static` are both [modifiers]
+    - public, protected, private, static, const, 
+
+- Static using statement
+```c#
+using static System.Console;
+using static System.Math;
+
+WriteLine($"The squre root of 16 is { Sqrt(16) }");
+```
+
+- Constant acts like a static, but it does not allocate memory space in heap, do not have their own storage locations,
+- Only substituted in by the compiler at compile time. 
+- Cannot declared as static
+    ```c#
+        static const double PI = 3.14;      // Error: can't decalre a constant as static
+    ```
+
+- Property, like a field
+    - It is a named class member.
+    - It has a type
+    - It can be assigned to and read from.
+
+- But unlike a field, however, a property is a ***function member***
+    - It does not necessarily allocate memory for data storage.
+    - It executes code.
+    - ***accessors***
+
+- Static constructor
+    - *Static constructors* initialize the *static fields* of the class
+    - There can be only a single static constructor for a class, and it cannot have parameters.
+    - cannot have accessibility modifiers.(`public` or `private`)
+    - You cannot explicityly call static constructor, system will call it automatically, at some indeterminate time.
+        - Before any instancer of the class is created
+        - Before any static member of the class is referenced.
+
+- Object initializer
+    - first: finish execute the constructor, then initialize the values
+    ```c#
+        new Point { X = 5, Y = 6 };
+    ```
+
+- Unmanaged resources
+    - things such as file handles that you've gotten using the Win32 API, or chunks of unmanaged memory.
+
+- Indexer
+    - is a pair of *get* and *set* accessors.
+    - does not allocate memory, like property
+    - always ***isntance member***, cannot be ***static***
+    ```c#
+        ReturnType this [ Type param1, ... ]
+        {
+            get { ... }
+            set { ... }
+        }
+    ```
+
+- Partial method
+    - No access modifier, implicitly `private`
+    - return void
+    - no `out` parameter
+    - include `partial void methodName() { ... }`
+
+## Chapter 8 Classes and Inheritance ##
+- Call order
+    1. Member initialize
+    2. Base class constructor
+    3. Derived class constructor
+```c#
+   class MyDerivedClass : MyBaseClass
+   {
+      int MyField1 = 5;                      // 1. Member initialized
+      int MyField2;                          //    Member initialized
+      public MyDerivedClass()                // 3. Body of constructor executed
+      {
+         ...
+      }
+   }
+   class MyBaseClass
+   {
+      public MyBaseClass()                   // 2. Base class constructor called
+      {
+         ...
+      }
+   }
+```
+
+- So, calling virtual method in Base class constructor is strongly disouraged.
+    - The virtual method in base class constructor will call the override method in derived class.
+    - That would be ***before*** the derived constructor execute.
+    - Calling the derived class before it is completely initialized.
+
+- Verbatim string literal
+  - @"dkjfa"
+  - sets of contiguous double quotes are interpreted as a single double quote character.
+  ```c#
+    string vst2 = @"It started, ""Four score and seven...""";
+  ```
+
+## Chapter 9 Expressions and Operators ##
+- Delegates is reference type and use deep comparison.
+  - When delegates compare for equality, return `true` when:
+    - both are `null`
+    - both have the ***same number**** of members in their invocation lists and invocation lists ***match***.
+
+- Bitwise manipulation of signed numbers
+  - The underlying hardware represents signed binary number in a form called ***two's complement*** 二进制补码
+  
+- 就像一个操场跑道，你站在右边，想去左边的某个点：
+    - 你可以跑一整圈过去（很慢）
+    - 也可以直接穿过操场到对面（很快）
+    - 补码就是第二种。
+
+- 这个是怎么来的？
+  1. 一切的***起点***: 机器只有加法器，没有减法器
+  2. 我们想算 a - b = result,
+  3. 我们想用 a + (某个数) = result
+  4. 这样，我们就可以用*某个数*作为 *-b*的计算机表示形式。
+  5. 在8位计算机中，数从0开始到255， 然后再加一就又变成0，想象成操场。 
+      - 想象成一个一圈有256米的跑道，一个小朋友从*任意点*米开始跑，跑256米之后，又回到了*任一点*的位置。
+      - 所以如果一个小朋友从10米开始跑，他想跑到9米的位置，他不能往后跑，只能往前跑，那么他就要跑255米。
+        - 这就是 10 - 1 的结果，就等于 10 + 255 的结果，
+        - 那么 *255* 就是 *-1* 的二进制表示， 在 *8* 位的计算机当中。
+      
+      - 如果想从10米跑到7米，那么 就要往后跑3米（减法），或者往前跑 256 - 3 = 253米（加法）
+        - 那么 *253* 就是 *-3*的二进制表示，也是在 *8* 位的计算机当中了。
+      
+      - 所以 a - 4 = a + (256 - 4)
+        - 想得到 a 减去一个数的值，就用 a 加上这个数的模就可以了。
+
+      - 其实就是数学中 *模* 的概念。
+  6. 然后我们就得到了对应负数的计算机二进制表示
+      - -1 = 256 - 1 = 255  (1111 1111)
+      - -2 = 256 - 2 = 254  (1111 1110)
+      - -127 = 256 - 127 = 129 = (1000 0001)
+        - 就是：
+         - （-正数）= 负数 = (2ⁿ - 正数)
+  7. 最自然的结果就是
+      - 负数区就是最高位=1的数（二进制）
+      - 在模2ⁿ的 "后半圈"
+  8. 最终才有 " 最高位 = 1 是负数 " 这个规则。
+  9. 最后大家发现，正数按位取反 + 1就是负数的二进制，于是 取反+1 成为了补码的简便算法。
+
+- ⭐ 所以整个逻辑顺序是这样的：
+  - ① 目标：让计算机用同一个加法器处理加法和减法
+  - ② 数学结论：负数必须是 “2ⁿ − x” 的形式
+  - ③ 这样推出来：高位恰好变成 1（因为数值落在后半段）
+  - ④ 才有 “最高位=1 表示负数” 的规则
+  - ⑤ 最后发现巧合：“取反+1” 就是 “2ⁿ − x” 的快速算法
+  - 补码不是随便规定的，它是 自然推导 出来的。
+
+⭐ 一句话总结
+  - 1000 0001 代表 -127，不是因为规定，而是因为在 8 位二进制的模 256 世界里：
+  - 1000 0001 = 129，而 129 是从 256 往回数 127 个，所以它表示 -127。
+
+- Operator overloading
+  ```c#
+    public static LimitedInt operator - (LimitedInt x) { ... }
+  ```
+
+- A ***resource*** is a class or struct that implements the `System.IDisposable` interface.
+
+## Chapter 12 Enumeration ##
+- Enums are value types
+- The members are static, which, as you'll recall, means that they are accessible even if there are no variables of the enum type.
