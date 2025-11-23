@@ -324,3 +324,13 @@ WriteLine($"The squre root of 16 is { Sqrt(16) }");
 ## Chapter 12 Enumeration ##
 - Enums are value types
 - The members are static, which, as you'll recall, means that they are accessible even if there are no variables of the enum type.
+
+## Chapter 13 Arrays ##
+- Multidimensional
+  - Rectangular arrays
+    ```c#
+      int x = myArray2[4, 6, 1]   // One set of square brackets
+    ```
+  - Jagged arrays
+    ```c#
+      int y = jagArray[2][7][4]   // Three sets of square brackets
