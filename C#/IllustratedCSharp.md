@@ -207,7 +207,7 @@ WriteLine($"The squre root of 16 is { Sqrt(16) }");
 - Indexer
     - is a pair of *get* and *set* accessors.
     - does not allocate memory, like property
-    - always ***isntance member***, cannot be ***static***
+    - always ***instance member***, cannot be ***static***
     ```c#
         ReturnType this [ Type param1, ... ]
         {
@@ -329,8 +329,20 @@ WriteLine($"The squre root of 16 is { Sqrt(16) }");
 - Multidimensional
   - Rectangular arrays
     ```c#
-      int x = myArray2[4, 6, 1]   // One set of square brackets
+      int[,] intArr = new int[4, 6];   // One set of square brackets
+      System.Console.WriteLine(intArr.Rank);    // Output is: 2
+
+      int[] arr = new int[] { 10, 20, 30 };
+      var arr = new[] { 10, 20, 30 };
+      var arr = new int[3];   // All values default
     ```
   - Jagged arrays
+    - Array of independent arrays
     ```c#
-      int y = jagArray[2][7][4]   // Three sets of square brackets
+      int[][] y = new int[2][];   // Three sets of square brackets
+
+      int[][] SomeArr; // Rank = 1
+      int[][][] OtherArr; // Rank = 1
+
+![alt text](image-8.png)
+
