@@ -27,3 +27,28 @@
     - `dotnet dev-certs https --trust`
       - trust the existing certificate
     - restart the browser to validate it.
+
+- Create migration
+  - services.AddDbContext<AppDbContext>(opt => {})
+    - Needs Microsoft.EntityFrameworkCore.Design
+  - Migrations
+    - Need `dotnet ef` command, which needs to install from the nuget. keyword: "dotnet ef nuget"
+  -Migration command
+    - `dotnet ef migrations add Init -p Persistence -s API`
+      - `-p` is the project where dbContext located.
+      - `-s` is the start project
+  - Update database
+    - `dotnet ef database update -p Persistence -s API`
+  - Dropp database
+    - `dotnet ef database drop -p Persistence -s API`
+
+### Lesson 7 - Seeding Data ###
+- create static function named SeedData(AppDbContext context), async version
+- In program, 
+  1. create a scope
+  2. scope get service
+  3. service get DbContext
+  4. context.Database.MigrateAsync
+  5. Initilizer.SeedData(context)
+  6. Log if there's any exception. Logger is DI resolved as well.
+  7. Wrap 4, 5 in try, 6 in catch
