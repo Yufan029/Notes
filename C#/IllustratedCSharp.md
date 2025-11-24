@@ -346,3 +346,22 @@ WriteLine($"The squre root of 16 is { Sqrt(16) }");
 
 ![alt text](image-8.png)
 
+### Array Covariance ###
+- Array is a reference type array.
+- There's an implicit or explicit conversion.
+  - So, you can always assign an object of a derived class to an array declared for the base class.
+
+- No covariance for value type arrays.
+
+### Array clone ###
+- shallow copy
+- Cloning a value type array results in two independent arrays.
+- Cloning a reference type array results in two arrays pointing at the same objects.
+- The *Clone* method returns a reference of type **object**, which must be cast to the array type.
+  ```c#
+    int[] intArr1 = { 1, 2, 3 };
+    int[] intArr2 = (int[]) intArr1.Clone();
+  ```
+
+### Array and Ref Return and Ref Local ###
+P346
