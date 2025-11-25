@@ -56,3 +56,15 @@
   5. `Initilizer.SeedData(context)`
   6. Log if there's any exception. Logger is DI resolved as well.
   7. Wrap 4, 5 in try, 6 in catch
+
+### Lesson 8 - Create Controller ###
+1. Create a base controller inherit from ControllerBase
+2. Create ActivitiesController and use Primary Constructor syntax to inject the dbContext
+- 503 server too busy
+- ***Restart the server*** as the first step to fix any issue
+- The request route is https://localhost:5001/api/activities
+
+### Lesson 9 - Postman ###
+- Create Workspace, like 'ReactivitiesCourse'
+- Inside the workspace, you can create a collection, like 'Reactivities'
+- And in each collection, you can create folder to organise your requests.
