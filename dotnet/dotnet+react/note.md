@@ -98,3 +98,7 @@
     ``` 
 - ES7+React/Redux/React-Native snippets
 - ESLint
+
+### Lesson 4, 5 Fetching Data From Server ###
+- useState, useEffect
+- builder.Services.AddCors()
