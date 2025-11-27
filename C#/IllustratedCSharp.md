@@ -365,3 +365,7 @@ WriteLine($"The squre root of 16 is { Sqrt(16) }");
 
 ### Array and Ref Return and Ref Local ###
 P346
+
+## Chapter 14 Delegates ##
+- Delegate as class is a user-defined ***type***.
+- Holds one or more methods and a set of predefined operations.
