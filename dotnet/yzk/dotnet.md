@@ -697,12 +697,6 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
 - 如果这个组件只是针对MVC或者需要调用一些MVC相关的类的时候，（例如需要得到`controller`的名字，`action`的名字），我们就需要用Filter
 - 可以把`filter`理解成MVC中的小中间件
 
-### JWT ###
-- user info stores on user computer
-- Server sign and pass the JWT to the client
-- The client send the request along with the JWT
-- Server verify it to authenticate user.
-
 ### Multi-thread / Task / Parallel / async, await ###
 - 在 dotnet （2025/11/20），99%的时候应该使用 `async/await`, 只有在你需要 `cup-bound`的密集型工作时，才使用`Task.Run`, 而 `Parallel` 用于大批量CPU密集计算。 `Thread` 几乎不用自己创建。
 
@@ -746,6 +740,32 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
   - ContinueWith（用 async/await）
   - Thread.Suspend / Resume（危险）
   - ManualResetEvent / AutoResetEvent（除非底层代码）
+
+## Chapter 5 Identity JWT FluentValidation WebSocket SignalR##
+
+### Chapter 5-1 Asp.net Identity 1 ###
+- Authentication vs Authorization
+- Identity framework, Role-Based Access Control RBAC
+- Three Base classes
+  - `IdentityUser<TKey>`
+  - `IdentityRole<TKey>`
+    - 一般创建继承类，可以省去写的时候每次都带着泛型，麻烦。自定义类，可以通过父类指定这个泛型类型，子类就不需要再写了
+    - 可以自定义属性，微信号之类的
+  - `IdentityDbContext<User, Role, Key>`
+- Install Microsoft.AspNetCore.Identity.EntityFrameworkCore
+
+- IdentityUser<long>
+  - long 在SQL中对应 ***BIG INT***
+
+### Chapter 5-2 Identity 2 ###
+
+
+
+### JWT ###
+- user info stores on user computer
+- Server sign and pass the JWT to the client
+- The client send the request along with the JWT
+- Server verify it to authenticate user.
 
 ### part 5-5 JWT ###
 - JWT
