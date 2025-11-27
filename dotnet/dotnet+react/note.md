@@ -96,3 +96,5 @@
           port: 3000
         }
     ``` 
+- ES7+React/Redux/React-Native snippets
+- ESLint
