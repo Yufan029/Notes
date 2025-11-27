@@ -43,7 +43,7 @@
       - `-s` is the start project
   - Update database
     - `dotnet ef database update -p Persistence -s API`
-  - Dropp database
+  - Drop database
     - `dotnet ef database drop -p Persistence -s API`
 
 ### Lesson 7 - Seeding Data ###
@@ -56,3 +56,31 @@
   5. `Initilizer.SeedData(context)`
   6. Log if there's any exception. Logger is DI resolved as well.
   7. Wrap 4, 5 in try, 6 in catch
+
+## Section three Walking Skeleton Part 2 - Client ##
+### Lesson 1 ###
+- Vite, React project files, React concepts, React Dev tools
+- Typescript
+- Axios
+- Material UI
+
+### Lesson 2 ###
+- npm create vite@latest
+  - Check the command from the vite doc.
+  - npm first complain about it, update it from 11.6.2 -> 11.6.4, fix it.
+  - Ok to proceed? (y)
+  - Project name: `client`
+  - Select a framework: `React`
+  - Select a variant: `TypeScript + SWC`
+
+- Create the `client` project in the `Reactivities` sln
+
+### Lesson 3 ###
+- Change port
+  - In vite.config.ts
+    ```ts
+        server: {
+          port: 3000
+        }
+    ``` 
+  
