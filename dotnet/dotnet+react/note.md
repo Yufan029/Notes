@@ -102,3 +102,10 @@
 ### Lesson 4, 5 Fetching Data From Server ###
 - useState, useEffect
 - builder.Services.AddCors()
+
+### Lesson 6, 7 typescript, react dev tools ###
+- create a file in src/lib/types/index.d.ts (typescript definition file)
+- copy the json we got from server then find a converter in internet, convert it from json to ts
+- short-cut key for format shift + alt + F in windows, you can check that in right click menu
+- Adding the definition at the highest level as you can.
+  - Say in useState

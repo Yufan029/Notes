@@ -758,7 +758,19 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
   - long 在SQL中对应 ***BIG INT***
 
 ### Chapter 5-2 Identity 2 ###
-
+- Create a controller
+- In the action,
+  - role manager check if the "admin" role exist
+    - if not create
+  - user manager check the user with name "yzk" exist
+    - if not create
+    - then add to the admin role
+- 检查用户登录信息
+  - 用 User manager find user by name,
+    - if not found, fail
+  - check if the user has been ***locked***
+  - if not locked, check password
+  - 可以自定义用户锁定时长，尝试次数。  
 
 
 ### JWT ###
