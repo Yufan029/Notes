@@ -109,3 +109,29 @@
 - short-cut key for format shift + alt + F in windows, you can check that in right click menu
 - Adding the definition at the highest level as you can.
   - Say in useState
+
+### Lesson 8 material ui ###
+- material ui doc
+  - install material ui etc.
+  - install font (Roboto)
+  - install icon
+  - vs code -> setting -> linked editing (change the pair tag at the same time)
+
+- material ui we use
+  - Typography variant='h3'
+  - List, ListItem, ListItemText
+
+### Lesson 9 mkcert (Certificate Authorization) ###
+- Get the dev env as near as production env.
+  - use https
+  - have certificates
+- mkcert
+  - Since the address we use is not secure, we'll use mkcert to create local trust dev certificates.
+  - use via vite
+    - npm install -D vite-plugin-mkcert 
+    - after the installation, import in `vite.config.ts`
+      - import mkcert from 'vite-plugin-mkcert';
+      - `plugins: [react(), mkcert()],`
+
+### Lesson 10 Axios ###
+- npm install axios

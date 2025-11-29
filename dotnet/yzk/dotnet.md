@@ -772,6 +772,24 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
   - if not locked, check password
   - 可以自定义用户锁定时长，尝试次数。  
 
+### Chapter 5-3 密码重置 ###
+- I use the copilot, tell it what I want and it generates the code and I tweaked it a little bit, can be used.
+  1. ForgotPassword endpoint
+    - find the user
+    - `identityToken = userManager.GeneratePasswordResetTokenAsync(user)`
+    - if use 6-digits, `simpleToken = RandomNumberGenerator.GetInt32(100000, 1000000).ToString()`, more secure.
+    - get the `tokenExpiry = DateTime.UtcNow.AddMinutes(10);`
+    - store the [user, (simpleToken, identityToken, tokenExpiry)] in dic
+    - send the token to user via email, or console in this case.
+  2. ResetPassword
+    - find the user
+    - check the dic via username passed in
+    - compare the simpleToken and the expire date
+    - use `identityToken` to reset the password `userManager.ResetPasswordAsync(user, identityToken, newPassword)`
+
+- 看了视频之后：
+  1. 修改密码是幂等，用PUT
+  2. Program.cs里设置 `options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider`, 这个也可以让token变成6-digits.
 
 ### JWT ###
 - user info stores on user computer
