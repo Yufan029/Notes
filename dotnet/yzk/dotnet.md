@@ -791,17 +791,25 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
   1. 修改密码是幂等，用PUT
   2. Program.cs里设置 `options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider`, 这个也可以让token变成6-digits.
 
-### JWT ###
-- user info stores on user computer
-- Server sign and pass the JWT to the client
-- The client send the request along with the JWT
-- Server verify it to authenticate user.
 
-### part 5-5 JWT ###
-- JWT
-  - 三部分
-    - header
-    - payload
-    - signature
-  - 其中`header` 和 `payload` 是明文，可以通过编码解析出来，网上有线程的算法
-  - 不要把不希望被客户端知道信息放到JWT中
+### Chapter 5-4 session, jwt ###
+- http协议无状态，
+- session
+  - 服务器端记录客户端信息
+    - client登录，server为这个client生成一个session, 然后保存一个 session 和这个client的一个关系，把session id返回给client，client一般会存贮在cookies里
+    - client下次访问，带着这个session id，server就查找这个对应关系来确定是哪个client
+  - 缺点
+    - 分布式支持不好，如果支持分布式，需要一个专门的session服务器，采用Redis, Memcached.
+    - client需要存贮cookie，有的客户端不方便。
+- JWT (Json Web Token)
+  - 登录信息（token）保存至客户端
+  - server will sign the data with a secured secret key
+
+- three parts in JWT
+  - Header
+  - Payload
+  - Signature
+    - 其中`header` 和 `payload` 是明文，可以通过编码解析出来，网上有现成的算法
+    - 不要把不希望被客户端知道信息放到JWT中 
+
+### chapter 5-5 生成，解析 Jwt ###
