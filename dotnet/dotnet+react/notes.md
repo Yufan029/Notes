@@ -4,7 +4,7 @@
 - Domain is the center of the application and has no dependency on other parts.
 ![alt text](image.png)![alt text](image-1.png) 
 
-### Lesson 2 - DLI ###
+### Lesson 2 - CLI ###
 - dotnet CLI
   - `dotnet --info`
   - `dotnet new list`
@@ -70,7 +70,7 @@
 - Inside the workspace, you can create a collection, like 'Reactivities'
 - And in each collection, you can create folder to organise your requests.
 
-## Section three Walking Skeleton Part 2 - Client ##
+## Section 3 Read & execute Walking Skeleton Part 2 - Client ##
 ### Lesson 1 ###
 - Vite, React project files, React concepts, React Dev tools
 - Typescript
@@ -122,7 +122,7 @@
   - List, ListItem, ListItemText
 
 ### Lesson 9 mkcert (Certificate Authorization) ###
-- Get the dev env as near as production env.
+- Get the dev env as samiliar as production env.
   - use https
   - have certificates
 - mkcert
