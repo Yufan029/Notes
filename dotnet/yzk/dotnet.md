@@ -822,3 +822,22 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
 - 防止客户端篡改，服务器如何校验？
   1. server 在生成 jwt token的时候用到的security key一定不能泄露。
   2. JwtSecurityTokenHandler, ValidateToken
+
+### chapter 5-6 asp.net 对 jwt 的封装
+- Nuget
+  - Microsoft.AspNetCore.Authentication.JwtBearer
+
+- Add in program.cs
+  1. configuration, JwtSettings class, inlucde SecurityKey, ExpireSeconds.
+    - `service.Config<JwtSettings>(builder.Configuratoin.GetSection("JWT"));`   // JWT 配置到appsettings.json, for the time being, securitykey should in the user-secret
+  2. `service.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt => *****)`   // 配置JwtToken的过期时间，SecurityKey etc.
+  3. ***Before*** `app.UseAuthenorization()` add `app.UseAuthentication()`
+  4. when login, generate the token then send to the authenticated user // user has the username and password passed correctly.
+  5. Add [Authorize] attribute to the action or controller, the Asp.Net will authorize user automatically.
+  6. Add the Bearer [token] to the authorization Http header to indicate valid user.
+
+- 缺点
+  - 错误调试的时候，到底是没有权限，token过期，格式不对，报错信息不明确。 
+
+- 对 OpenAPI 进行设置来增加Authorize按钮，可以加入 Bearer [token]
+  - 发挥：自定义报文头也可以照这个方法来加
