@@ -369,3 +369,78 @@ P346
 ## Chapter 14 Delegates ##
 - Delegate as class is a user-defined ***type***.
 - Holds one or more methods and a set of predefined operations.
+- Mehtods in the invocation list can be either instance methods or static methods.
+- Delegate is reference type, therefore has both a reference and an object.
+![alt text](image-9.png)
+- After assing the different delegate, the old delegate object will be disposed by GC.
+```c#
+  delegate void MyDel(int x);
+  MyDel delVar;
+  delVar = myInstObj.MyM1;
+  delVar = SClass.OtherM2;
+```
+![alt text](image-10.png)
+
+- Delegates are immutable.
+```c#
+  MyDel delA = myInstObj.MyM1;
+  MyDel delB = SClass.OtherM2;
+  MyDel delC = delA + delB;
+```
+![alt text](image-11.png)
+
+- C# provide the syntax, looks like you can add a method to a delegate, "+="
+  - What is actually happening?
+    - Everytime the += operator is used, a new delegate is created, with an invocation list that is the combination of the delegate on the left and the method listed on the right.
+    - The new delegate is then assigned to the delVar variable.
+- Also, you can add a method to a delegate more than once.
+
+- The value returned by the last method in the invocation list is the value returned from the delegate invocation.
+- All the other return values from other methods are ignored.
+```c#
+  delegate int MyDel( ); // Declare delegate with return value.
+  
+  class MyClass {
+    int IntValue = 5;
+    public int Add2() { IntValue += 2; return IntValue;}
+    public int Add3() { IntValue += 3; return IntValue;}
+  }
+
+  class Program {
+    static void Main( ) {
+      MyClass mc = new MyClass();
+      MyDel mDel = mc.Add2; // Create and initialize the delegate.
+      mDel += mc.Add3; // Add a method.
+      mDel += mc.Add2; // Add a method.
+      Console.WriteLine($"Value: { mDel() }");
+    }
+  }
+
+  /// Value: 12
+```
+![alt text](image-12.png)
+
+
+- If delegate has a reference parameter, the new value of the parameter pass to the next method.
+```c#
+  delegate void MyDel( ref int X );
+
+  class MyClass {
+    public void Add2(ref int x) { x += 2; }
+    public void Add3(ref int x) { x += 3; }
+
+    static void Main() {
+      MyClass mc = new MyClass();
+      MyDel mDel = mc.Add2;
+      mDel += mc.Add3;
+      mDel += mc.Add2;
+
+      int x = 5;
+      mDel(ref x);
+      Console.WriteLine($"Value: { x }");
+    }
+  }
+
+  /// Value: 12
+```
+![alt text](image-13.png)

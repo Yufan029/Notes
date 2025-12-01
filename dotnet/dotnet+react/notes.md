@@ -135,3 +135,14 @@
 
 ### Lesson 10 Axios ###
 - npm install axios
+
+
+## Section 4 ##
+**Creating a CRUD Application using the CQRS + Mediator Pattern**
+
+### Lesson 1 Introduction ###
+- Clean Architecture pattern
+- CQRS + Mediator patter
+  - Command Query Responsibility Segreation (Command Query Separation)
+  - Mediator to mediate between different layers in our clean architecture
+- Hanlder fro CRUD, will move to application layter.

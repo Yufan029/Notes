@@ -813,3 +813,12 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
     - 不要把不希望被客户端知道信息放到JWT中 
 
 ### chapter 5-5 生成，解析 Jwt ###
+- 生成 JWT TOKEN
+  - dotnet add package System.IdentityModel.Tokens.Jwt
+
+- Jwt token由三部分组成，header, payload and signature, 
+  - header and payload可以被 decode 出来，网上有算法，其实就是明文保存的
+
+- 防止客户端篡改，服务器如何校验？
+  1. server 在生成 jwt token的时候用到的security key一定不能泄露。
+  2. JwtSecurityTokenHandler, ValidateToken
