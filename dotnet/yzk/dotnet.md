@@ -841,3 +841,24 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
 
 - 对 OpenAPI 进行设置来增加Authorize按钮，可以加入 Bearer [token]
   - 发挥：自定义报文头也可以照这个方法来加
+
+### chapter 5-8 Jwt 无法提前撤回的难题 ###
+- 如何让客户端的JWT失效
+  - 例如客户端同时登录两个电脑，我们只允许一个
+  - 例如员工离职，如何使 Jwt 失效。
+
+- Jwt 是在客户端保存的，但是如果服务器端需要有能撤回的能力，那么就要在服务器端***保存状态***
+  1. 所有发放的jwt在服务端另存一份
+  2. refresh_token + access_token
+  3. yzk version
+    - user table add extra column for Jwt version.
+    - when user login JwtVersion++, write the JwtVersion into Token
+    - when ban user, delete user, user login from another place, etc., JwtVersion++
+    - when user operation with Jwt token, server compare if the client JwtVersion in the payload with the JwtVersion on the server.
+    - if (client.JwtVersion < server.JwtVersion) ==> the user invalid.
+    - Use less than, take 并发 into consideration.
+
+- How to implement
+  1. Add JWTVersion (long) for User class
+  2. Modify the code for generate JWT，user's JWTVersion++, add JWTVersion into payload
+  3. 编写一个筛选器，统一实现对所有controller方法中 JWT payload 中 JWTVersion 的检查操作。把JWTValidationFilter注册到Program.cs中MVC的全局筛选器中。

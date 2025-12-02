@@ -444,3 +444,15 @@ P346
   /// Value: 12
 ```
 ![alt text](image-13.png)
+
+- You can omit the anonymous parameters or even the paratheses all together, when both are true,
+  1. no **out** parameters
+  2. parameters are not used in the anonymous delegate.
+
+- The delegate has the **params** parameters, the anonymous method's parameter list, **must omit** the params keyword.
+```c#
+  delegate void SomeDel(int x, params int[] y);
+  SomeDel mDel = delegate (int x, int[] y) { ... }
+```
+
+- Use lambda, if lambda expression emerges before anonymous methods, then anomymous methods may not be invented anymore.
