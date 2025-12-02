@@ -456,3 +456,24 @@ P346
 ```
 
 - Use lambda, if lambda expression emerges before anonymous methods, then anomymous methods may not be invented anymore.
+
+## Chapter 15 Event ##
+- An event has an encapsulated delegate.
+![alt text](image-14.png)
+
+- In order to use event, there're ***five*** pieces of code.
+![alt text](image-15.png)
+
+- Declaring an Event
+  1. inside a class
+  2. requires the name of a delegate type.
+    - Any event handlers attached to the event **must match** the delegate type in signature and return type.
+```c#
+  class Incrementer
+  {
+    public event EventHandler CountedADozen;
+    // event         --> Keyword
+    // EventHandler  --> Delegate type
+    // CountedADozen --> Name of the event
+  }
+```

@@ -862,3 +862,4 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
   1. Add JWTVersion (long) for User class
   2. Modify the code for generate JWT，user's JWTVersion++, add JWTVersion into payload
   3. 编写一个筛选器，统一实现对所有controller方法中 JWT payload 中 JWTVersion 的检查操作。把JWTValidationFilter注册到Program.cs中MVC的全局筛选器中。
+  4. Add a attribute for login method to skip the validation
