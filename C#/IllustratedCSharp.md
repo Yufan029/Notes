@@ -458,6 +458,16 @@ P346
 - Use lambda, if lambda expression emerges before anonymous methods, then anomymous methods may not be invented anymore.
 
 ## Chapter 15 Event ##
+- publisher / subscriber
+  - publisher
+    - declare the event
+    - raise the event
+  - subscriber
+    - declare the event handler (callback)
+    - register the event handler
+  - event and event handler can be in the same class or struct, or different.
+  - On top of them, there's a delegate defines the pattern for event, and event handler.
+
 - An event has an encapsulated delegate.
 ![alt text](image-14.png)
 
@@ -475,5 +485,39 @@ P346
     // event         --> Keyword
     // EventHandler  --> Delegate type
     // CountedADozen --> Name of the event
+  }
+```
+
+- Event is ***not*** a type, it's a ***member*** of class, like method, property.
+
+- The foundation of the standard pattern for event usage in dotnet framework is the ***EventHandler*** delegate type.
+- **EventHandler**, the BCL declared delegate which used with system events, in *System* namespace.
+```c#
+  public delegate void EventHandler(object sender, EventArgs e);
+```
+
+- EventArgs
+  - Designed to carry **no** data.
+  - It is used by event handlers that do not need to pass data.
+  - If you want to pass data:
+    - declare a class derived from EventArgs, with the fields to hold the data.
+
+- Even though the **EventArgs** class does not actually pass data, it is an important part of the pattern of using the **EventHandler** delegate. These parameters, of types ***object*** and ***EventArgs***, are the base classes for whatever actual types are used as the parameters. This allows the ***EventHandler*** delegate to provid a signature that is the lowest common denominator for all events and event handlers, allowing all events to have exactly two parameters, rather than having different signatures for each case.
+
+- Event Accessors
+  - += and -= operator overwritten
+  - doesn't contain the embedded delegate object, need to implement your own storage mechanism.
+  - *void* method, no return value.
+
+```c#
+  public event EventHandler CountedADozen
+  {
+    add {
+      // code to implement the += operator
+    }
+    
+    remove {
+      // code to implement the -= operator
+    }
   }
 ```

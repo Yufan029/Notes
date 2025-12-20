@@ -863,3 +863,80 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
   2. Modify the code for generate JWT，user's JWTVersion++, add JWTVersion into payload
   3. 编写一个筛选器，统一实现对所有controller方法中 JWT payload 中 JWTVersion 的检查操作。把JWTValidationFilter注册到Program.cs中MVC的全局筛选器中。
   4. Add a attribute for login method to skip the validation
+
+### 5-9 托管服务的使用 (IHostedService) ###
+- host service (IHostedService), 一般从`BackgroundService`继承
+  - asp.net core 中，让一部分代码在**后台**运行
+
+- 一般继承自`BackgroundService`的服务是Singleton 的，它不能消费scope或者transit对象，例如在background service里，如果需要dbContext, 就需要用下面的方法.
+  - DI 进入 `IServiceScopeFactory`，然后创建scope, `this.serviceScope = serviceScopeFactory.CreateScope()`
+  - var testAdd = this.serviceScope.GetRequiredService<TestAdd>()
+  - 在 Dispose() 里要把 `this.serviceScope.Dispose()`
+
+### 5-10 定时把数据库内容写入文件 ###
+- 利用这个 `BackgroundService`, 在里面注入 `ISercieScopeFactory` 得到 `dbContext`, 操作数据库，dispose() 里 `this.serviceScope.Dispose()`
+- 如果需要定时操作，参考 `Hangfire` 库
+
+### 5-11 请求数据的校验 ###
+- `System.ComponentModel.DataAnnotations`
+  - [Required], [Compare(nameof(Password))]
+  - 缺点：违反SRP, 校验规则和Model类强耦合
+
+### 5-12 FluentValidation ###
+- Model
+  - `public record Login2Request(string Email, string Password, string Password2);
+- Validator
+  ```c#
+    public class Login2RequestValidator : AbstractValidator<Login2Request>
+    {
+      public Login2RequestValidator() 
+      {
+        RuleFor(x => x.Email).NotNull().EmailAddress().Must(v => v.EndsWith("@qq.com")).WithMessage("only support qq email.");
+      }
+    }
+  ```
+
+### 5-14 WebSocket, SignalR ###
+- 传统Http
+  - 客户端主动发请求到服务器， client --> server
+
+- 需求：Web聊天， 站内通知
+  - 聊天室，client 把消息发给 server， server 再把消息发给其他 clients.
+
+- 传统解决方案
+  - Long Polling, 长轮询
+
+-WebSocket
+  - 基于TCP协议，支持二进制通信，双工通信。
+  - 性能和并发能力更强。
+  - 通常把WebSocket部署到Web服务器上（http），因为可以借助HTTP协议完成握手（可选），并且共享HTTP服务器的端口（主要）。
+  - wss://localhost:7222/MyHub?id=*****
+  - 在websocket http响应的response ==> wss://localohost:7329/****, 可以看到具体的websocket消息，消息tab
+
+- negotiation的问题
+  - server 和 client 之间先通过一个 204 消息进行协商，再返回200表示成功， 最后才建立 websocket 通信通道 wws
+  - 但是
+    - 如果是集群服务器（多台服务器）, negotiation 被服务器A处理，而接下来的 websocket 请求却发给了服务器 B。
+    - 解决：
+      - 粘性会话 (sticky session)
+        - 中间有个负载均衡服务器，它来确定哪个client由哪个server来处理。
+        ![alt text](image-1.png)
+        - 缺点：
+          - 局域网共享IP，无法平均分配
+          - 扩容的自适应性不强。
+
+      - 禁用协商
+        - 没有negotiation, 直接 wws 发过去。
+        - 缺点：
+          - 无法降级到long pooling, 不是大问题。
+        - 目前最好的策略。
+
+- client1 如果想群发消息，如果是分布式server（多台server1， server2），那client1的群发消息只能发给server1链接的所有客户端
+  - 解决：
+    - 所有 server 链接到同一个消息中间件
+    - Microsoft 官方给的方案： Redis backplane
+  
+### 5-18 signalr 身份认证 ###
+- server 端配置, 在 program.cs中把access_token放到context里
+- client端配置，配置signalr的tokenFactory
+- signalr用[Authorize] attribute
