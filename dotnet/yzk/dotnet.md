@@ -940,3 +940,265 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
 - server 端配置, 在 program.cs中把access_token放到context里
 - client端配置，配置signalr的tokenFactory
 - signalr用[Authorize] attribute
+
+
+## Chapter 6 DDD ##
+- 架构的问题
+  1. 迷信大公司
+    - 要根据自己的需求和需要解决的问题来选择
+  2. 迷信流行技术
+    - 考虑，运维，后期维护，结合行业，结合技术，结合公司情况 etc.
+  3. 应该怎么做
+    - 结合公司，项目的情况，选择最合适的
+
+- 公司的架构是进化来的，最小的可行性产品 (MVP - Most Viable Product)，演进式架构
+
+- 软件退化以及如何预防
+  - 避免软件退化，第一个版本还okay，越加功能，可读性越差，可维护性越差，可扩展性越差，最后没人敢改，形成屎山代码！
+  - 同时，随着软件升级，不可避免的要对项目做**重构**，而不是基于以前的架构，继续堆功能。
+  - 该重构的时候就要重构，而不是让他继续恶化下去。
+  - 预防：
+    - 架构设计的时候要为以后做**适当**的考虑
+    - 该**重构**的时候就重构，要果断
+
+### 6-2 微服务 ###
+- 单体结构项目
+  - 同一个项目， 同一个进程。
+  - 缺点：
+    - 耦合
+    - 技术栈统一，版本锁定
+    - 一崩全崩
+    - 升级周期长
+    - 无法局部升级
+
+- 微服务 **micro-service**
+  - 独立项目，独立进程 
+  - 缺点：
+    - 运维能力要高
+    - 运行效率降低，进程间通信
+    - 技术要求高
+    - 需要处理事务最终一致性等问题
+  - ***DDD***是指导微服务拆分的重要原则
+    - 不要拆出一堆服务
+    - 服务之间不要胡乱调用
+    - 尽量做到扁平化
+
+### 6-3 DDD ###
+- 诞生于2004，兴起于2014（微服务元年）
+- 所有人，dev, tester, boss, 要站在用户的角度，业务的角度去思考问题，而不是站在技术的角度
+- DDD是方法论，不是行动指南
+- DDD学习方法
+  - 从理论到实践，再从实践到理论，如此往复，不同阶段，不同岗位，理解不同
+
+### 6-4 领域模型(domain model) 与 事务脚本 （写出屎山代码） ###
+- Domain 
+  - 一个组织做的事情
+  - 包括：
+    - 核心域
+    - 支撑域
+    - 通用域 （一般外包出去）
+- Domain model
+  - 要从业务语言去描述和建模，而不是从技术人员的角度
+  - 尽早建模，近晚实现
+
+- 事务性代码
+  - 使用技术人员的语言去描述和实现业务事务。
+  - 没有太多设计，没有考虑扩展，维护性差，流水账写代码。
+
+### 6-5 DDD 通用语言， 界限上下文 （context） ###
+- 每个人对 “删除， 用户” 有不同的理解， 要统一
+
+### 6-6 实体 (Entity)， 值对象 ### 
+- Entity
+ - has identity. 标识符
+ - EF Core里的实体类，是对DDD概念里实体的一个实现
+
+- 值对象 (Value Object)
+  - 没有标识符，也有多个属性，依附于某个实体对象而存在。
+  - 不能独立与实体而存在。
+  - 和普通对象的区别：
+    - 体现整体关系。
+
+- 值对象和实体
+  - 看是否可以脱离其他实体而存在，
+  - 商家倒闭了，员工还可以去其他商家，可以脱离于商家存在
+
+- 例如：
+  - 城市，我们可以定义为实体，有它自己的标识符（主键），里面包括经纬度，我们可以定义一个值对象，表示经纬度。
+
+### 6-7 聚合(Aggregate)， 聚合根 (Aggregate Root) ###
+- Aggregate 为了什么
+  - 高内聚 （有关系的实体紧密协作）， 加入鸡蛋的发电机。
+  - 低耦合
+
+- Aggregate Root
+  - 把关系紧密的实体放到一个聚合中
+  - 每个聚合中有一个实体作为聚合根 (Aggreate Root)
+  - 所有对于聚合内对象的访问都通过聚合根来进行
+  - 外部对象只能持有对聚合根的引用
+  - 不仅仅是实体，还是所在聚合的***管理者***
+
+- 如何划分聚合也是各不相同
+  - 主要考量
+    - 生命周期
+    - 从属关系，整体部分
+    - 对外接口，如果可以聚合，应该使用同一个聚合根
+    - 功能分类
+    - etc.
+  - 原则
+    - 聚合宁愿设计的小一点，也不要设计的太大 （利于划分微服务，将来）
+
+### 6-8 领域服务(Domain Service)， 应用服务(Application Service) ###
+- 指的就是代码放在哪，整个DDD就是在讨论代码放到哪。
+
+- 实体中的代码:
+  - 聚合中的实体没有业务逻辑，只有对象创建，初始化，状态管理等个体相关代码。
+
+- Domain Service:
+  - **聚合内**的业务逻辑，编写到 Domain Service，比较胖的，当然有些小型的程序，可能都没有这个
+
+- Application Service:  
+  - **跨聚间**，聚合与外部系统协作，编写到 Application Service
+
+- 应用服务协调多个领域服务及外部系统，来完成一个**用例**（用户要完成的一个事）。
+
+- 聚合内 - 事务强一致性 （要么全部成功，要么全部失败）， Unit of work
+- 聚合间 - 最终一致性
+
+- Repository & Unit Of Work 是DDD中的概念
+- dbContext & SaveChanges 是EF Core对DDD概念的实现
+
+### 6-9 DDD之 领域事件，集成事件 ###
+- 事件这个概念在DDD中，最重要
+- 事件
+  - 发生某个事的时候，执行某个动作
+
+- 用事务脚本（业务逻辑怎么样，就流水账的写代码）写代码，有如下**问题**
+  - 随着需求的增加，代码持续增加，流水账，屎山代码。
+  - 扩展性差， 维护性差， Open-Close Principle, 在不修改已有代码的情况下增加新功能。
+  -- 容错性差
+
+- 如何**解决**
+  - 采用 事件(event) 机制
+  ```c#
+    // file1.
+    void 保存答案(long id, string answer)
+    {
+      // 保存数据库
+      // 发布事件("答案已保存", aId, answer);  PublishEvent("...")
+    }
+
+    // file2.
+    [绑定事件("答案已保存")]
+    void 审核答案()
+    {
+      // ...
+    }
+
+    // file3.
+    [绑定事件("答案已保存")]
+    void 发邮件提醒()
+    {
+      // ...
+    }
+  ```
+  - 代码在不同的文件中
+  - 关注点分离，容易扩展， 容错性好
+
+- Domain Events
+  - 同一个微服务内部的事件传递，进程内通信
+  - 可以通过 EventHandler
+
+- Integration Events
+  - 跨微服务的事件，微服务和微服务之间的通信
+  - 一般使用事务总线 EventBus 来实现，像 RabbitMQ, redis
+
+
+## 已下大概用10节课讲解 DDD 在 dotnet 中是如何实现的，如何落地 ##
+### 6-10 DDD 实战 - dotnet贫血模型与充血模型 ###
+- 主要讲述实体如何实现
+- 贫血模型与充血模型 => 讲述怎么设计这个实体类，代码放到哪的问题。
+
+- 贫血
+  - 一个类中只有属性或者成员变量，没有方法
+
+- 充血
+  - 一个类中既有属性，成员变量，也有方法
+
+### 6-11 EF Core 对实体属性操作的秘密 ###
+- C#中如果对 property 进行操作，其实是对 backing field 的操作，调用它的 get; set; 方法
+```c#
+  class Person {
+   public string name;      // backing field
+   public string Name       // property
+   {
+    get => this.name;
+    set => this.name = value;
+   } 
+  }
+```
+
+- 基于性能和对特殊功能（充血模型）支持的考虑，EF Core 在读写 property 的时候，如果可能，它会直接跳过 get; set; 而直接操作真正存储 property 值的成员变量（backing field）。通过反射可以读取private的值
+- EF Core 运用命名规则去寻找，例如 Porperty 是 Name, 它会去找名为 name 的成员变量， 如果把 name 改成 xingming， EF Core就不知道 backing field 了，就老老实实的调用 get; set;
+
+### 6-12 EF Core 中充血模型的需求 ###
+- 充血模型需要实现的要求
+  1. 属性只读，或只能被类内部修改
+    - 实现：把属性的set定义为 private or init
+
+  2. 定义有参数的构造方法
+    - 原因：
+      ```c#
+        var user = context.Users.First();
+        // 1. 从数据库读取一行数据
+        // 2. 创建一个实体对象实例 （需要无参构造函数，最好）
+        // 3. 把每一列的值填充到对象属性里
+        // 4. 如果只有有参构造函数。
+        //  - EF Core 不知道传什么值
+        //  - 不知道参数顺序
+        //  - 不知道是不是navigation property
+      ```
+    - 有参的构造函数的参数名必须和类中的属性名一致，例如： public string UserName { get; set; }, public ctor(string userName)
+    - 如果有无参数的构造方法则无所谓。
+    - 实现方式1： 定义无参构造方法，并且定义为 ***private/protected***， 给EF Core 专用， 一般用这个，简单。
+    - 实现方式2： 只定义有参构造方法，但要求构造方法中参数名和属性名一致。
+
+  3. 没有对应属性(property)的成员变量(member variable, backing field)，需要把私有成员变量映射到数据表中的列
+    - 实现： builder.Property("成员变量名")
+      
+  4. 有的属性只读，值从数据库读取，但我们不能修改
+    - 实现： 在配置实体类代码中，使用 `HasField("成员变量名")` 来配置属性即可.
+
+  5. 有的属性不需要映射到数据列，进在运行时使用
+    - 实现： Ignore() 配置实体类时设置。
+
+### 6-13 EF Core中实现充血模型 ###
+  ```c#
+    public class User
+    {
+      private string? passwordHash; // 需求3，只有成员变量，没有对应的属性 
+
+      private string? remark;
+
+      public string? Remark  // 需求4， 只读属性
+      {
+        get {
+          return this.remark;
+        }
+      }
+
+      public string? Tag { set; get; }
+    }
+
+    internal class UserConfig : IEntityTypeConfiguration<User>
+    {
+      public void Configure(EntityTypeBuilder<User> builder)
+      {
+        builder.Property("passwordHash"); // 需求3
+        builder.Property(e => e.Remark).HasField("remark") // 需求4
+        builder.Ignore(e => e.Tag); // 需求5
+      }
+    }
+    ```
+
+### 6-14 EF Core 中实现值对象 ###

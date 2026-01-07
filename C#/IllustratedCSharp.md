@@ -521,3 +521,35 @@ P346
     }
   }
 ```
+
+## Chapter 16 Interfaces ##
+
+## Chapter 17 Conversions ##
+- checked and unchecked expression
+```c#
+  sb = unchecked ( (byte) sh ); // Most significant bits lost
+  Console.WriteLine($"sb: { sb }");
+  // sb: 208
+
+  sb = checked ( (byte) sh ); // OverflowException raised
+  Console.WriteLine($"sb: { sb }");
+```
+
+Also
+
+- checked and unchecked statements
+```c#
+byte sb;
+ushort sh = 2000;
+checked
+{
+  unchecked
+  {
+    sb = (byte) sh;
+    Console.WriteLine( $"sb: { sb }" );
+  }
+
+  sb = checked((byte) sh);
+  Console.WriteLine( $"sb: { sb }" );
+}
+```
