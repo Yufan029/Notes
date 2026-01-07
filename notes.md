@@ -1,0 +1,2 @@
+this is a note to use for cherry-pick from git-test repo to Notes repo
+Add a new line change.
