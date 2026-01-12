@@ -1202,3 +1202,71 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
     ```
 
 ### 6-14 EF Core 中实现值对象 ###
+- 例如：
+  - 城市，我们可以定义为实体，有它自己的标识符（主键），里面包括经纬度，我们可以定义一个值对象，表示经纬度。
+
+- enum类型作为值类型在实体中：
+  - Enum type as the value in entity, it can be saved to db as integer by default, if you want to save the string of the enum, need to use the ***HasConversion***
+  ```c#
+    public enum CurrencyName {
+      CYN,
+      USD,
+      AUD
+    }
+
+    public class Entity1 {
+      public int Id { get; set; }
+      public CurrencyName Currency { get; set; }
+    }
+
+    public class Entity1Config : IEntityTypeConfiguration<Entity1>
+    {
+      public void Configure(EntityTypeBuilder<Entity1> builder)
+      {
+        builder.Property(e => e.Currency).HasConversion<string>();  // after apply this line, the string of the currency name can be saved to database instead of int value.
+      }
+    }
+  ```
+
+- 另一个类作为值对象在实体中存贮：
+  ```c#
+    // we have a Geo record
+    record Geo {
+      public double Longitude { get; init; }
+      public double Latitude { get; set; }
+
+      ctor() {...}
+    }
+
+    public class Shop 
+    {
+      public int Id { get; set; }
+      public string Name { get; set; }
+      public Geo Location { get; set; }
+    }
+
+    public class ShopConfig : IEntityTypeConfiguration<Shop>
+    {
+      public void Configure(EntityTypeBuilder<Shop> builder)
+      {
+        builder.OwnsOne(x => x.Location);
+      }
+    }
+  ```
+
+- 值对象： DDD中的概念
+- 值类型： C#中的概念
+
+### 6-16 DDD聚合在.NET中的实现 ###
+- 聚合 ：高内聚，低耦合
+  - 把关系强的实体放到同一个聚合中，把其中一个实体作为 “聚合根”，对于同一个聚合内的其他实体，都通过聚合根实体进行
+
+- 为什么划分聚合，划分聚合的依据？
+  - 方便以后拆分成微服务，如果一个聚合根引用了另一个聚合根的实体，则很难拆分，应该引用其主键id，
+  - 如果拆分成微服务，则两个微服务用不同的数据库
+
+- 在建模的时候不要考虑实体数据如何在数据库中保存，例如：实体类要和数据库表具有直接对应关系，列要相同 etc.，
+- 这样设计出来的类，称不上“实体类”，只能被称为“数据对象” （Data Object），更不要用DB First
+
+- 应该，不考虑数据库实现，设计实体类建模，然后再使用Fluent API等对实体类和数据库之间做适配。
+- 实现的时候，可能实体类无法完全实现，可以稍微妥协，但不应在最开始就考虑
