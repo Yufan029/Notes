@@ -1270,3 +1270,70 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
 
 - 应该，不考虑数据库实现，设计实体类建模，然后再使用Fluent API等对实体类和数据库之间做适配。
 - 实现的时候，可能实体类无法完全实现，可以稍微妥协，但不应在最开始就考虑
+
+### 6-17 用MediatR实现领域事件 ###
+- 领域事件
+  - 例子： 保存答案的时候，通知别的模块去处理保存答案这个事件，有没有违规的内容，发短信，发邮件通知提问的人。
+
+- 事件
+  - 领域事件 - 在微服务内的 - 进程内，（一个微服务就是一个独立的进程）
+  - 集成事件 - 跨微服务的
+
+- 实现方式
+  1. C#的事件机制
+  ```c#
+    var bl = new ProcessBusinessLogic();
+    bl.ProcessCompleted += bl_ProcessCompleted;
+    bl.StartProcess();
+  ```
+    - 缺点： 需要显示注册
+  
+  2. **进程内**消息传递，开源库， **MediatR**
+    - 事件的发布和处理之间解耦。
+    - 支持 “一个发布者 对应 一个处理者 或者 多个处理者” 两种模式
+    - Publish, EventHandler<ChangeColor>
+
+### 6-18 EF Core中发布领域事件的合适时机 ###
+
+### 6-19 RabbitMQ简介 ###
+- 如果需要发送集成事件，跨微服务，跨进程，需要第三方消息分发服务
+  - 一般叫做事件总线 *Event bus*
+  - Redis, RabbitMQ, Kafka, ActiveMQ
+
+- RabbitMQ 基本概念
+  1. 信道 Channel）
+  2. 队列（Queue）
+  3. 交换机 （exchange）
+    - 不同的消息放到不同的队列中
+
+- RabbitMQ 有多种模式 （5 种 +）
+- 这里介绍RabbitMQ的Routing模式
+![alt text](image-2.png)
+
+### 6-20 .net中RabbitMQ的基本使用 ###
+- message sender， EmitLogDirect.cs
+- message receiver， ReceiveLogsDirect.cs
+- **Routing**， channel, exchange, routingKey, 
+
+### 6-21 .net中简化DDD集成事件的框架 ###
+- Microsoft has one example: eShopOnContainers
+- Zack has his package based on eShopOnContainers: Zack.EventBus
+
+### 6-22 Zack.EventBus源代码 ###
+
+### 6-23 洋葱架构 ###
+- 传统三层
+  - 用户界面 (UIL) --> 业务逻辑 (BLL) --> 数据访问 (DAL)
+  - 缺点：
+    - 仍然是面向数据库的思维方式。
+    - 对于不需要逻辑的增删改查，仍然需要BLL进行转发。
+    - 依赖关系是单向的，下层代码不能使用上一层中的代码
+  
+  - 解决方案：
+    - Clean Architect / Union Architect (整洁架构)
+![alt text](image-3.png)
+    - 内层更加抽象，外层更加实现/现实
+    - 外层代码只能调用内层代码，
+    - 内层代码可以通过 DI 来间接调用外层代码。
+
+  - ACL - Anti Corruption Layer

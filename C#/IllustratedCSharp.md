@@ -553,3 +553,14 @@ checked
   Console.WriteLine( $"sb: { sb }" );
 }
 ```
+
+- Boxing creates a copy of the original value variable
+
+- User-defined conersions
+```c#
+  // Convert Person to int
+  public static implicit operator int(Person p)
+  {
+    return p.Age;
+  }
+```
