@@ -564,3 +564,151 @@ checked
     return p.Age;
   }
 ```
+
+## Chapter 18 Generics ##
+- Constraint types and order
+  - five types
+    1. *ClassName*
+    2. class - reference type, (classes, arrays, delegates, interface)
+    3. struct - value type
+    4. InterfaceName
+    5. new() - parameterless public constructor
+
+  - Order
+    - If the constructor constraint is present, it must be listed last
+    ![alt text](image-16.png)
+
+- Generic method
+  - Type parameter, method parameter
+  ```c#
+    // <type parameter>
+    // (method parameter)
+    public void MyMethod<T>(T myVal) { ... }
+  ```
+  - if the type parameter can be inferred from the method parameter, the type parameter and its angle brackets can be omitted.
+  ```c#
+    int myInt = 5;
+    MyMethod(myInt);
+  ```
+
+- *variance*
+  - Covariance
+  - Contravariance
+  - Invariance
+
+- You can assign an object of a more derived type to a variable of one of its base type. (assignment compatibility)
+- You can assign a reference of a more derived type to a variable of a less derived type.
+```c#
+  class Animal { public int Legs = 4; }   // base class
+  class Dog : Animal { }                  // derived class
+
+  Animal a1 = new Animal();
+  Animal a2 = new Dog();
+```
+![alt text](image-17.png)
+
+  - **Dog** can assign to **Animal**
+
+- Covariant relationship allows a more derived type to be in return and out positions
+```c#
+  delegate T Factory<out T>();
+
+  class Program
+  {
+    static Dog MakeDog()
+    {
+      return new Dog();
+    }
+
+    static void main() 
+    {
+      Factory<Dog> dogMaker = MakeDog;
+      Factory<Animal> animalMaker = dogMaker;
+
+      Console.WriteLine(animalMaker().Legs.ToString());
+    }
+  }
+```
+- If there's no `out` keyword in delegate declaration, then delegate `Factory<Dog>` and delegate `Factory<Animal>` are not compatible. They both derived from the `Object` --> `delegate` class
+
+- After adding the `out` keyword, let the compiler know our intent is to use the T as the **return value**, so a more derived type can be used as a less derived type. A dog can be used as an animal with no error.
+
+
+- Contravariance
+  - Allowing a more derived object where a less derived object is expected.
+  - Used only as an *input* parameter.
+```c#
+  class Animal { public int Legs = 4; }
+  class Dog : Animal { }
+
+  delegate void Action1<in T>(T a);
+
+  class Program
+  {
+    static void ActOnAnimal(Animal a) { Console.WriteLine(a.Legs); }
+
+    Action1<Animal> animalAct = ActOnAnimal;
+    Action1<Dog> dogAct = animalAct;
+
+    dogAct(new Dog());
+  }
+```
+
+- Actually covariance and contravariance both use the imiplicit assignment compatbility.
+  - Covariance
+    - use the type as `out`
+    - the more derived type (dog) can be assigned to less derived type (animal), `Factory<Animal> = Factory<Dog>`
+    - since the code gonna using the return value, will only expect a less derived type (animal)
+    - The dog absolutely has all the animal's functionality.
+  - Contravariance
+    - use the type as `in`
+    - the less derived type (animal) can be assigned to more derived type (dog), `Action1<Dog> = Action1<Animal>` (conter-intuitive a bit, but make sense after thinking)
+    - since the code gonna using the passing parameter, will only expect the function from a less derived type (animal)
+
+- 说到底，就是传的这个值能安全使用，他们俩的类型是可以默认转换的。即就是，子类可以当父类用，因为子类有所有父类的功能。
+- 一个是作为输出，一个作为输入，都使用了默认类型转换，只是起了个不同的名字而已。
+- 站到这个值的**使用者**的角度去考虑就可以理解了。
+
+- 都是很讲理的，没有拧巴的非得要强制转换。
+
+- Covariance and Contravariance only use for Delegate and Interface
+
+## Chapter 19 Enumerators and Iterators ##
+- Enumerable has a method called **GetEnumerator()**, which return Enumerator. So, it can be used in foreach.
+
+- Enumerator implements IEnumerator<T>, needs to implement below property and methods:
+  - Current
+  - MoveNext
+  - Reset
+
+- Start from C# 2.0, compiler uses iterator to generate the enumerators and enumerables, no need manually create the Enumerable and Enumerator
+
+- An **iterator** block is a code block with one or more **yield** statements.
+- The code in the iterator block describes how to enumerate the elements.
+
+- **yield return**, specifies the next item in the sequence to return.
+- **yield break**, specifies that there are no more items in the sequence.
+
+- You can have an iterator block produce either an enumerator or an enumerable depending on the return type you specify.
+![alt text](image-18.png)
+
+
+## Chapter 20 LINQ ##
+- Evey data source type, which support LINQ, under the covers, there must be a module of code that implements the LINQ queries in terms of that data source type. 
+- These code modules are called LINQ providers.
+
+- Anonymous Types
+  - variable of anonymous type
+  ```c#
+    static void main()
+    {
+      // Must use var, anonymous variable
+      var student = new { Name = "Mary Jones", Age = 19, Major = "History" };
+
+      Console.WriteLine($"{student.Name}, Aget {student.Age}, Major: {student.Major}");
+    }
+  ```
+  - Only with local variable, not with class memebers.
+  - doesn't have a name, must use **var**
+  - cannot assign to a properties of an object of an anonymous type, read-only.
+    - `student.Age = 20;` // Compiling error

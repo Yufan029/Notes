@@ -1337,3 +1337,19 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
     - 内层代码可以通过 DI 来间接调用外层代码。
 
   - ACL - Anti Corruption Layer
+
+## 6-24 ~ 6-29 DDD实战 ##
+### 6-24 DDD 实战 - 项目分层 ###
+- 需求：
+  - 一个微服务
+    - 用户管理
+    - 用户登录
+    - 后台用户，添加，解锁，修改用户密码
+    - 前台用户，手机号加密码，手机号加短信验证码
+    - 多次登录失败，账户锁定一段时间，
+    - 无论成功失败，登录记录日志
+
+- 三层：
+  - 内：Domain (实体类，时间，防腐层接口，仓储接口)
+  - 中：Infrastructure （实体类实现，DbContext, 防腐层实现，仓储实现）
+  - 外：WebAPI (Controller, 领域事件domain event，集成事件的响应)
