@@ -709,6 +709,13 @@ checked
     }
   ```
   - Only with local variable, not with class memebers.
+    - ```c#
+      class PersonHolder
+      {
+        public var Person = new { Name = "Tom", Age = 30 };   // ❌ Error
+      }
+      ```
+
   - doesn't have a name, must use **var**
   - cannot assign to a properties of an object of an anonymous type, read-only.
     - `student.Age = 20;` // Compiling error

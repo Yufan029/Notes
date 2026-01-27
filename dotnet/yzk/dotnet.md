@@ -1353,3 +1353,17 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
   - 内：Domain (实体类，时间，防腐层接口，仓储接口)
   - 中：Infrastructure （实体类实现，DbContext, 防腐层实现，仓储实现）
   - 外：WebAPI (Controller, 领域事件domain event，集成事件的响应)
+
+### 6-25 ###
+1. 识别实体 - find the entities.
+  - User
+  - UserAccessFail, this info doesn't have a lot relation to User, say user info in receipt, no need the failure info, so better to separate to another entity.
+  - UserLoginHistory
+
+2. 识别 聚合根 - 把哪几个实体作为一个聚合
+  - User 和 UserAcessFail 设计为同一个聚合，把 User 设置为聚合根。
+    - 因为所有对 UserAccessFail 的操作都通过 User 这个实体来进行，关系紧密
+    - 没有 User, 也就没有 UserAccessFail 的必要了
+  - 有需求：
+    - 需要单独查询一段时间内的登陆记录，独立于某个特定的用户，
+    - 把 UserLoginHistory 设计为一个单独的聚合。
