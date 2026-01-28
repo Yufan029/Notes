@@ -1,3 +1,4 @@
+namespace UserMgr.Domain.Entities;
 
 // 独立的聚合，aggregate root
 public record UserLoginHistory : IAggregateRoot

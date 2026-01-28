@@ -719,3 +719,18 @@ checked
   - doesn't have a name, must use **var**
   - cannot assign to a properties of an object of an anonymous type, read-only.
     - `student.Age = 20;` // Compiling error
+  
+  - Behind the scene
+    - The compiler create a new class type with private name
+    - if compiler encounter another anonymous object initializer with same parameter names, same types, same order, it reuse the created class to create a new instance.
+
+- LINQ, Method Syntax vs Query Syntax
+  - Method Syntax
+    - imperative,
+    - specifies the order query methods are to be called.
+  - Query Syntax
+    - Declarative
+    - describe what you want, doesn't specify how to perform the query.
+    - Microsoft recommends
+
+![alt text](image-19.png)

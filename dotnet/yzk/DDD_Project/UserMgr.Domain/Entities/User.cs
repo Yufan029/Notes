@@ -1,5 +1,7 @@
 using Zack.Commons;
 
+namespace UserMgr.Domain.Entities;
+
 public record User : IAggregateRoot
 {
     public Guid Id { get; init; }
@@ -19,7 +21,7 @@ public record User : IAggregateRoot
         UserAccessFail = new UserAccessFail(this);
     }
 
-    public bool HasPassword(string password)
+    public bool HasPassword()
     {
         return !string.IsNullOrEmpty(passwordHash);
     }

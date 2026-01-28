@@ -1,3 +1,5 @@
+namespace UserMgr.Domain.Entities;
+
 public record UserAccessFail
 {
     public Guid Id { get; init; }
