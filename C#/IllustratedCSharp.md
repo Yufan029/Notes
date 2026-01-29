@@ -26,26 +26,12 @@ So after JIT compile, the code under the management of CLR, like memory release,
 ---
 
 ## Chapter 3 ##
-5. The Console type provided via BCL
-
-```C#
-Console.WriteLine("The value: {0,-10:C}.", 500); // minus means left alignment
-int myInt = 500;
-Console.WriteLine($"The value: {myInt,10:C}.");  // 10 is the minimum width
-
-double myDouble = 12.345678;
-Console.WriteLine("{0,-10:F4} -- Fixed Point, 4 dec places.", myDouble);     // ==> 12.3457
-```
-![alt text](image-3.png)
-
+- The Console type provided via BCL? Common Type System?
 
 ## Chapter 4 ##
 - C    - functions and data types
-
 - C++  - functions and classes.
-
 - C#   - a set of type declarations
-
 
 - What is type?
   - A template for creating data structures.
@@ -69,18 +55,18 @@ Console.WriteLine("{0,-10:F4} -- Fixed Point, 4 dec places.", myDouble);     // 
 
 ## Chapter 6 ##
 - Beginning with C# 7.0 you can declare a separate method inside another method.
-- Isolate the inner method from outside.
-- Called *local functions*
+  - Isolate the inner method from outside.
+  - Called *local functions*
 
 - Formal parameter Vs Actual parameter(argument)
- - Formal parameter is the parameter used for declare the method.
- - Actual parameter is the value used for invoke the method.
+  - Formal parameter is the parameter used for declare the method.
+  - Actual parameter is the value used for invoke the method.
 
 - Value Parameters Vs Reference Parameters
-  - For value parameters, the system allocates memory on the stack for formal parameters.
-  
-  - Reference parameters ***DO NOT*** allocate memory on the stack for the formal parameteres.
-    - The formal parameter name acts as an ***alias*** for the actual parameter variable, referring to the same memory location.
+  - For value parameters, the system allocates memory on the stack for formal parameters.  
+  - Reference parameters **DO NOT** allocate memory on the stack for the formal parameteres.
+
+- The formal parameter name acts as an **alias** for the actual parameter variable, referring to the same memory location.
   ```c#
     void MyMethod(ref int val) {...}
     int y = 1;
@@ -88,7 +74,7 @@ Console.WriteLine("{0,-10:F4} -- Fixed Point, 4 dec places.", myDouble);     // 
   ```
 
 - *Output parameters*
-  - Like reference parameters, the formal parameters of *output parameters* act as *aliases*
+  - Like reference parameters, the formal parameters of *output parameters* act as **aliases**
   ```c#
     MyMethod(out MyClass a1, out int a2);
   ```
@@ -102,7 +88,7 @@ Console.WriteLine("{0,-10:F4} -- Fixed Point, 4 dec places.", myDouble);     // 
         ListInts( 1, 2, 3 );
       ```
 
-### Ref Local and Ref Return
+### Ref Local and Ref Return ###
 - *ref local* allows a variable to be an alias for another variable.
   ```c#
     static void Main() {
