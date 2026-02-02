@@ -1,8 +1,18 @@
+using Microsoft.AspNetCore.Mvc;
+using UserMgr.Infrastructure;
+using UserMgr.WebAPI;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.Configure<MvcOptions>(options =>
+{
+    options.Filters.Add<UnitOfWorkFilter>();
+});
+
+
 
 var app = builder.Build();
 
@@ -19,7 +29,7 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/weatherforecast", [UnitOfWork(typeof(UserDbContext))]() =>
 {
     var forecast =  Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
