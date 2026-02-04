@@ -4,14 +4,13 @@
 ### Check the location of FileStream in different Assembly (.net framework, .net core, .net standard) ####
   - typeof(FileStream).Assemble.Location
 
-### 反编译工具 ### 
-
+### 反编译工具 ###
 - ILSpy
 - 反编译后，知道 async await 是被编译器拆分成一个个小部分，在 switch 语句中调用。
 
-ThreadPool.QueueUserWorkItem 在线程池执行
-
-查看异步运行前后的线程 Id, 如果异步程序运行时长，线程很有可能切换。之前的线程返回线程池，异步完成后，分配新的线程 from threadpool。
+- ThreadPool.QueueUserWorkItem 在线程池执行
+- 查看异步运行前后的线程 Id, 如果异步程序运行时长，线程很有可能切换。之前的线程返回线程池，异步完成后，分配新的线程 from threadpool。
+- So async and multi-thread are two different things, async can be running both in single-thread and multi-thread.
 
 ### Occam's Razor ###
 - 如无必要，勿增实体
