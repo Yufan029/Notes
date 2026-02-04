@@ -720,3 +720,5 @@ checked
     - Microsoft recommends
 
 ![alt text](image-19.png)
+
+- From clause, does not assume an order

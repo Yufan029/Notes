@@ -1371,3 +1371,103 @@ DbContext Entry(object) 得到 `EntityEntry`, EFCore 靠它跟踪对象。 `Enti
 - Repository
   - Get***, non-nullable
   - Find***, nullable 
+
+### 6-27 Infrastructure ###
+聚合（Aggregate）是一组必须“一起保持一致”的对象, 一致性边界（Consistency Boundary）
+聚合根（Aggregate Root）是这组对象对外唯一的入口
+
+Order (订单)  ← 聚合根
+ ├─ OrderItem (订单项)
+ ├─ ShippingAddress (收货地址)
+ └─ PaymentInfo (支付信息)
+
+DbContext 只暴露聚合根
+public DbSet<Order> Orders { get; set; }
+// ❌ 不要 DbSet<OrderItem>
+
+
+🚦 如何判断是不是一个聚合？
+问自己 3 个问题：
+✅ 1️⃣ 它们是否必须一起修改？
+如果是 → 同一聚合
+
+✅ 2️⃣ 删除父对象，子对象是否毫无意义？
+如果是 → 同一聚合
+
+❌ 3️⃣ 是否需要独立查询 / 独立生命周期？
+如果是 → 不同聚合
+
+| 中文 | English | 一句话理解 |
+|------|---------|------------|
+| 领域 | Domain | 你正在解决的业务世界 |
+| 领域模型 | Domain Model | 用代码表达业务规则 |
+| 实体 | Entity | 有身份（Id），会变化 |
+| 值对象 | Value Object | 没身份，只看值 |
+| 聚合 | Aggregate | 必须一起保持一致的一组对象 |
+| 聚合根 | Aggregate Root | 聚合对外唯一入口 |
+| 仓储 | Repository | 只存取聚合根 |
+| 领域服务 | Domain Service | 不属于任何实体的业务规则 |
+| 领域事件 | Domain Event | 领域中发生的重要事情 |
+| 一致性边界 | Consistency Boundary | 事务边界 |
+
+EF Core 中的对应关系（学习重点）
+DDD 概念	EF Core 实现
+聚合根	DbSet<T>
+实体	HasOne / HasMany
+值对象	OwnsOne / OwnsMany
+聚合内对象	不暴露 DbSet
+一致性边界	DbContext + Transaction
+
+Entity = 有唯一身份（Identity）的对象
+特点
+  有 Id
+  状态会变
+  相同属性 ≠ 同一个对象
+
+值对象（Value Object）= 没有身份，只关心值
+EF Core:
+  builder.OwnsOne(o => o.Price);
+
+Aggregate = 一致性边界, 👉 一次业务操作中，必须一起正确的那一坨对象 / 一起失败
+Aggregate Root = 聚合对外唯一合法入口
+
+Domain Service - 不自然属于任何一个实体的业务规则
+
+聚合根是「业务概念」
+数据表是「存储实现」
+EF Core 只是把前者映射到后者
+
+Aggregate Root
+  只有一个实体	User
+  一个实体 + 多个子实体	Order + OrderItems
+  一个实体 + 值对象	Order + Money + Address
+
+聚合根 一定是实体（Entity）
+  有 Id
+  有生命周期
+  被 Repository 管
+
+  聚合根是一个实体
+  它代表一个业务对象
+  它负责一个一致性边界
+  EF Core 通常把它映射为一个 DbSet / 主表
+  但它不是“表”本身
+
+DDD 的原则是：
+  聚合不是按“类型相似度”分
+  而是按“一致性规则”分
+
+
+### 6-28 DDD实战 工作单元 ###
+- 工作单元是由**应用服务层**来确定，其他层不应该调用`SaveChangesAsync`方法保存对数据库的修改。
+- 因为要一个完整的 `User story`，例如修改了用户年龄，身高，etc.，只需要一个Save
+- 只有应用层才能知道一系列操作是否是一个完整的`Unit of Work`
+- 所以，一般来讲是在 controller 里的 action 方法最后，调用 `SaveChangesAsync`
+
+- 问题：如果每个 actions 我都要在最后 savechanges, 能不能让他自动化
+- 解决：
+  - Filter 完成是最合适的，action执行结束，自动调用Filter，filter执行SaveChanges操作
+  - 因为一个项目很可能有*多个*dbContext，我们写一个 `UnitOfWorkAttribute` 来记录他的 DbContextTypes,
+    - 哪个action用到了哪个dbContext，就把对应的attribute加到action方法上。
+  - 然后，再写一个 `UnitOfWorkFilter` 通过反射拿到 action 里的 dbContext, 
+  - 最后根据不同的 dbContext 调用它的 SaveChanges 方法
