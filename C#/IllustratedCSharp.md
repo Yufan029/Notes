@@ -721,4 +721,140 @@ checked
 
 ![alt text](image-19.png)
 
-- From clause, does not assume an order
+- 'from' clause, does not assume an order
+
+```c#
+  var query = from s in students
+              join c in studentsInCourses on s.StID equals c.StID
+              where c.CourseName == "History"
+              select s.LastName;
+```
+
+- Can have multiple from clause, first one is required, after that is the query body
+```c#
+  static void main()
+  {
+    var gourpA = new[] { 3, 4, 5, 6 }
+    var groupB = new[] { 6, 7, 8, 9 }
+
+    var someInts = from a in groupA     // required first from clause
+                   from b in groupB     // first clause of query body
+                   where a > 4 && b <= 8
+                   select new { a, b, sum = a + b };     //Object of anonymouse type
+
+    foreach (var x in someInts)
+    {
+      Console.WriteLine(x);
+    } 
+  }
+
+  // output
+  { a = 5, b = 6, sum = 11 }
+  { a = 5, b = 7, sum = 12 }
+  { a = 5, b = 8, sum = 13 }
+  { a = 6, b = 6, sum = 12 }
+  { a = 6, b = 7, sum = 13 }
+  { a = 6, b = 8, sum = 14 }
+```
+
+- let clause
+```c#
+  var someInts = from a in groupA
+                 from b in groupB
+                 let sum = a + b           // Store result in new variable.
+                 where sum == 12
+                 select new {a, b, sum};
+```
+
+- A query expression can have any number of where clauses, as long as they are in the from...let...where section.
+![alt text](image-20.png)
+
+- item must satisfy all the *where* clause
+```c#
+var someInts = from int a in groupA
+              from int b in groupB
+              let sum = a + b
+              where sum >= 11       // Condition 1
+              where a == 4          // Condition 2
+              select new {a, b, sum};
+  
+  // output
+  { a = 4, b = 7, sum = 11 }
+  { a = 4, b = 8, sum = 12 }
+  { a = 4, b = 9, sum = 13 }
+```
+
+- There can be multiple order clause, use comma to separate.
+```c#
+var query = from student in students
+            orderby student.Age, student.LName descending
+            select student;
+```
+
+- Group
+```c#
+  var students = new[] // Array of objects of an anonymous type
+  {
+    new { LName="Jones", FName="Mary", Age=19, Major="History" },
+    new { LName="Smith", FName="Bob", Age=20, Major="CompSci" },
+    new { LName="Fleming", FName="Carol", Age=21, Major="History" }
+  };
+
+  // query of type IEnumerable<IGrouping>
+  var query = from student in students
+              group student by student.Major;
+
+  foreach (var g in query)
+  {
+    Console.WriteLine("{g.key}")    // each group is distinguished by key
+
+    foeach (var s in g)    // each group is itself enumerable IEnumerable<Student>
+    {
+      Console.WriteLine($"\t {s.LName}, {s.FName}")
+    }
+  }
+
+  // Output
+  History
+      Jones, Mary
+      Fleming, Carol
+  CompSci
+      Smith, Bob
+```
+
+- Query Continuation
+```c#
+  var groupA = new[] {3, 4, 5, 6}
+  var gorupB = new[] {4, 5, 6, 7}
+  var someInts = from a in groupA
+                 join b in groupB on a equals b
+                 into groupAandB            // Query Continuation
+                 from c in groupAandB
+                 select c;
+  foreach (var v in someInts)
+  {
+    Console.Write($"{ v }");
+  } 
+
+  // output
+  4 5 6
+```
+
+- standard query operator
+  - Count, First, Any, etc.
+  - compiler translate all query expression to query operation
+  - Some of the operation cannot be done by query expression, only by query operation, like **Count**, **Sum**, can only using the method syntax.
+  - can be combined
+    ```c#
+      int howMany = (from n in numbers
+                     where n < 7
+                     select n).Count();
+    ```
+
+- Markup Language
+  - a set of tags placed in a document to give information about the information in the document and to organize its content. (HTML)
+  - the markup tags are not the data of the document - they contain data about the data.
+  - Data about data is called *metadata*
+
+- LINQ to XML API
+  - XDocument, XElement, XAttribute
