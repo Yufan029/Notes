@@ -142,7 +142,7 @@
 
 ### Lesson 1 Introduction ###
 - Clean Architecture pattern
-- CQRS + Mediator patter
+- CQRS + Mediator pattern
   - Command Query Responsibility Segreation (Command Query Separation)
   - Mediator to mediate between different layers in our clean architecture
-- Hanlder fro CRUD, will move to application layter.
+- Hanlder fro CRUD, will move to application layer.

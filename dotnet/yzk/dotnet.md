@@ -2,16 +2,39 @@
   - https://github.com/yangzhongke/NETBookMaterials
 
 ### Check the location of FileStream in different Assembly (.net framework, .net core, .net standard) ####
-  - typeof(FileStream).Assemble.Location
+  ```c#
+    Console.WriteLine(typeof(FileStream).Assembly.Location);
+    
+    // Output
+    C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.2\System.Private.CoreLib.dll
+  ```
 
-### 反编译工具 ### 
-
+### 反编译工具 ###
 - ILSpy
-- 反编译后，知道 async await 是被编译器拆分成一个个小部分，在 switch 语句中调用。
+- 反编译后，知道 async await 是被编译器拆分成一个个小部分，在 switch 语句中调用, state machine
 
-ThreadPool.QueueUserWorkItem 在线程池执行
+- ThreadPool.QueueUserWorkItem 在线程池执行
+- 查看异步运行前后的线程 Id, 如果异步程序运行时长，线程很有可能切换。之前的线程返回线程池，异步完成后，分配新的线程 from threadpool。
+- So async and multi-thread are two different things, async can be running both in single-thread and multi-thread.
+```c#
+  Console.WriteLine($"Managed Thread Id = {Environment.CurrentManagedThreadId}");
+  await foreach (var line in File.ReadLinesAsync("1.txt"))
+  {
+      Console.WriteLine("inside the loop");
+      await Task.Delay(3000);
+      Console.WriteLine($"Managed Thread Id = {Environment.CurrentManagedThreadId}");
+      Console.WriteLine(line);
+  }
 
-查看异步运行前后的线程 Id, 如果异步程序运行时长，线程很有可能切换。之前的线程返回线程池，异步完成后，分配新的线程 from threadpool。
+  // output
+  Managed Thread Id = 2
+  inside the loop
+  Managed Thread Id = 8
+  a part of the file
+  inside the loop
+  Managed Thread Id = 9
+  today we eat sushi.
+```
 
 ### Occam's Razor ###
 - 如无必要，勿增实体
