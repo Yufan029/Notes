@@ -138,3 +138,91 @@
         modelBuilder.Entity<BookAuthorMap>().HasKey(u => new { u.Book_Id, u.Author_Id });
     }
 ```
+
+### Lesson 41 Fluent API ###
+- Code first will do Fluent API --> Data Annotation --> Default Convention
+
+```c#
+    public DbSet<Fluent_BookDetail> BookDetai_fluent
+
+    protected override void OnModelCreateing(ModelBuilder modelBuilder)
+    {
+        // Change the table name
+        modelBuilder.Entity<Fluent_BookDetail>.ToTable("Fluent_BookDetails");
+
+        // Change the column name
+        modelBuilder.Entity<Fluent_BookDetail>().Property(u => u.NumberOfChapters).HasColumnName("NoOfChapters");
+
+        // has key
+        modelBuilder.Entity<Fluent_BookDetail>().HasKey(c => c.BookDetail_Id);
+
+        // required
+        modelBuilder.Entity<Fluent_BookDetail>().Property(u => u.NumberOfChapters).IsRequired();
+
+        // Max Length
+        modelBuilder.Entity<Fluent_Book>().Property(u => u.ISBN).HasMaxLength(50);
+
+        // [NotMapped]
+        modelBuilder.Entity<Fluent_Book>().Ignore(u => u.PriceRange);
+    }
+```
+
+### Lesson 47 One to One in Fluent API ###
+![alt text](image.png)
+- Book has one BookDetails, BookDetails has one Book
+- If you want to use Book as the `parent` class there, you need to add the **foreign key** to the BookDetails, and the navigation properties on both side.
+- Fluent API version
+```c#
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Fluent_BookDetail>().HasOne(b => b.Book).Withone(b => b.BookDetail).HasForeignKey<Fluent_BookDetail>(u => u.Book_Id);
+    }
+```
+
+- **谁拥有foreign key,就在谁里边定义**
+
+- One to Many
+![alt text](image-1.png)
+```c#
+    // with one to many, the foreign key always in the one side, no need to specify in the angle bracket <> of HasForeignKey, EF Core will know it.
+    modelBuidler.Entity<Fluent_Book>().HasOne(b => b.Publisher).WithMany(p => p.Books).HasForeignKey(b => b.Publisher_Id);
+```
+
+- Many to Many, Authors to Books
+    - if using the auto generated middle table, no need to set the fluent API, just add the *Navigation Properties*
+
+- With the manual mapping table
+![alt text](image-2.png)
+```c#
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Fluent_BookAuthorMap>().HasKey(u => new { u.Book_Id, u.Author_Id });
+        modelBuilder.Entity<Fluent_BookAuthorMap>().HasOne(b => b.Book).WithMany(b => b.BookAuthorMap).HasForeignKey(u => u.Book_Id);
+        modelBuilder.Entity<Fluent_BookAuthorMap>().HasOne(b => b.Author).WithMany(b => b.BookAuthorMap).HasForeignKey(u => u.Author_Id);
+    }
+```
+
+- EF Core will automatically create the mapping table in DB, while not adding DbSet<Fluent_BookAuthorMap> in DbContext, 
+- But if user want to access the data in this manual mapping table, you need to explicitly adding DbSet<MappingTable> to DbContext
+
+### Lesson 52 Organize Fluent API ###
+- Create specific config file, like FluentBookDetailConfig, inherit from IEntityTypeConfiguration<Fluent_BookDetail>
+```c#
+    public class FluentBookDetailConfig : IEntityTypeConfiguration<Fluent_BookDetail>
+    {
+        public void Configure(EntityTypeBuilder<Fluent_BookDetail> modelBuilder)
+        {
+            // then all the setting in the OnModelCreatiing can be move to here, no need to specify the Entity<Fluent_BookDetail>()
+            modelBuilder.ToTable("Fluent_BookDetails");
+            modelBuilder.Property(u => u.NumberOfChapters).HasColumnName("NoOfChapters");
+            modelBuilder.HasKey(c => c.BookDetail_Id);
+            modelBuilder.Property(u => u.NumberOfChapters).IsRequired();
+        }
+    }
+
+    // then in the OnModelCreating
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfiguration(new FluentBookDetailConfig());
+    }
+```
