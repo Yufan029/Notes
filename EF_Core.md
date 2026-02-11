@@ -226,3 +226,22 @@
         modelBuilder.ApplyConfiguration(new FluentBookDetailConfig());
     }
 ```
+
+## Day 6 ##
+### Lesson 53 Access DbContext from Console ###
+```c#
+    using(ApplicationDbContext context = new())
+    {
+        context.Database.EnsureCreated();
+        if (context.Database.GetPendingMigration().Count() > 0)
+        {
+            context.Database.Migrate();
+        }
+    }
+```
+
+```c#
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
+    {
+        options.UseSqlServer("connectonString").LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information);
+    }
