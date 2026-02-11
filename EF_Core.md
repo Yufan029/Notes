@@ -245,3 +245,13 @@
     {
         options.UseSqlServer("connectonString").LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information);
     }
+```
+
+- EF Core contain function itself
+```c#
+    // all books ISBN starts with 12
+    var books = context.Books.Where(b => EF.Functions.Like(b.ISBN, "12%"));
+```
+
+-- Pagination
+    - Skip, Take
