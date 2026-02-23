@@ -1,0 +1,11 @@
+React - The Complete Guide (incl. Next.js, Redux)
+
+### 1 - 10 ###
+- What is React
+    - A javascript library for UI
+
+- Why using it
+    - Faster frontend response, update the page without reloading the page.
+
+- Why using Vite
+    - It will generate the minimum output and optimise etc. of the react source code you write for customer to download
