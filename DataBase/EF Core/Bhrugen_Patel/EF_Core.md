@@ -247,11 +247,76 @@
     }
 ```
 
-- EF Core contain function itself
+- EF Core contain function itself 
 ```c#
     // all books ISBN starts with 12
     var books = context.Books.Where(b => EF.Functions.Like(b.ISBN, "12%"));
 ```
 
 -- Pagination
-    - Skip, Take
+    - Skip, Take 
+
+### 8-86 Explicit loading ###
+```c#
+    // least efficient
+    obj.Publisher = _db.Publishers.Find(obj.Publisher_Id);
+
+    // more efficient (Explicit loading)
+    _db.Entry(obj).Reference(u => u.Publisher).Load();
+
+    // eager loading ❤️
+    _db.BookDetail.Include(x => x.Book).FirstOrDefault(x => x.BookDetail_Id = Id);
+```
+
+### 92 IEnumerable vs IQueryable ###
+- IEnumerable, filter data on client side.
+```c#
+    IEnumerable<Books> BookList = _db.Books;
+    var FilteredBook = BookList.Where(b => b.Price > 50).ToList();
+
+    // Generated Query
+    SELECT [b].[BookId], [b].[Category_Id], [b].[BookISBN], [b].[Price], [b].[Publisher_Id], [b].[Title]
+    FROM [Books] AS [b]
+
+    // then Filter is applied in memory
+```
+
+- IQueryable, filter the data on database side. ✔️
+```c#
+    IQueryable<Books> BookList = _db.Books;
+    var fitleredBook = BookList.Where(b => b.Price > 50).ToList();
+
+    // Generated Query, fitler applied in place
+    SELECT [b].[BookId], [b].[Category_Id], [b].[BookISBN], [b].[Price], [b].[Publisher_Id], [b].[Title]
+    FROM [Books] AS [b]
+    WHERE [b].[Price] > 50.0
+```
+
+- In visual studio watch window can lookup: "_db.ChangeTracker.Entries()"
+
+- Adding a view in migration 
+    ```sql
+        migrationBuilder.Sql(@"CREATE OR ALTER VIEW dbo.GetMainBookDetails
+            AS
+            SELECT m.ISBN, m.Title, m.Price FROM dbo.Books m
+        ");
+    ```
+- Create a corresponding class to include ISBN, Title, Price and no id.
+- We still need to create a DbSet<MainBookDetails> for the class, but we don't want to create a new table in DB, so we need to let EF Core knows that we don't want to create a table for this view.
+    ```sql
+        -- ToView tells EF Core we donnot want to create a table for that, it is a view.
+        -- And EF Core will not track this entity
+        -- Anything retrieved frmo the view will read only, cannot be tracked.
+        modelBuilder.Entity<MainBookDetails>.HasNoKey().ToView("GetMainBookDetails");
+    ```
+    ```c#
+        // When using
+        var viewList = _db.MainBookDetails.ToList();
+        var viewList1 = _db.MainBookDetails.Where(x => x.Price > 30);
+    ```
+
+- Raw SQL 
+    ```c#
+        var bookRaw = _db.Books.FromSqlRaw("Select * from dbo.books").ToList();
+        var bookRawInter = _db.Books.FromSqlInterpolated($"Select * from dbo.Books where bookId={id}").ToList();
+    ```

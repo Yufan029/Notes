@@ -1,0 +1,3 @@
+- in psql command line
+    - \l -> list all the datatabase
+    - \c NewDb -> switch databases

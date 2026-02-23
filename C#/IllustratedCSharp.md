@@ -858,3 +858,5 @@ var query = from student in students
 
 - LINQ to XML API
   - XDocument, XElement, XAttribute
+  - Nodes return IEnumerable<object>, so using OfType<T>
+    - `IEnumerable<XComment> comments = xd.Nodes().OfType<XComment>();`
