@@ -1,6 +1,6 @@
 React - The Complete Guide (incl. Next.js, Redux)
 
-### 1 - 10 ###
+### 1 - 9 ###
 - What is React
     - A javascript library for UI
 
@@ -9,3 +9,12 @@ React - The Complete Guide (incl. Next.js, Redux)
 
 - Why using Vite
     - It will generate the minimum output and optimise etc. of the react source code you write for customer to download
+
+### 12 ###
+- In html file, <script src="assets/scripts/app.js" type="module"></script>
+    - This `type` attribute means that you can add `import` into the js file to import other js file, use it as a javascript module.
+
+- 14
+    ```js
+        Import * as util from "./util.js";
+    ```
