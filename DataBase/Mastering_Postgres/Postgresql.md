@@ -566,4 +566,112 @@ select * from users;
     create unique index email on users(email) where deleted_at is null;
 ```
 
+### 51. Indexing ordering ###
+- Creating the index, especially composite index, in the order you want to read it
+```sql
+    select * from pg_indexes where tablename='users';
+    drop index multi;
+    drop index email;
+    create index created_at on users(created_at);
 
+    -- index scan
+    explain select * from users order by created_at limit 10;
+    -- index scan backward, postgres provide
+    explain select * from users order by created_at desc limit 10;
+
+    create index birthday_created_at on users(birthday, created_at);
+
+    -- index scan
+    explain select * from users order by birthday, created_at limit 10;
+    -- index scan backward
+    explain select * from users order by birthday desc, created_at desc limit 10;
+
+    -- twist, one desc, one asc, then incremental sort, not using index anymore
+    explain select * from users order by birthday desc, created_at asc limit 10;
+    explain select * from users order by birthday asc, created_at desc limit 10;
+
+    -- But if you create your index in different orders
+    drop index birthday_created_at;
+    create index birthday_created_at on users(birthday asc, created_at desc);
+    -- index scan, since the index defined like that.
+    explain select * from users order by birthday asc, created_at desc limit 10;
+    -- Also you can twist the order, then it will become Index Scan Backward
+    explain select * from users order by birthday desc, created_at asc limit 10;
+
+    -- If you use it not like defined, you back to the Incremental Sort again.
+    explain select * from users order by birthday asc, created_at asc limit 10;
+```
+
+### 52. Ordering nulls in indexes ###
+- If you find yourself reaching for *nulls first* or *nulls last* in the query, relatively often, you might consider to create a index to represent that same exact order.
+```sql
+    select * from users limit 10;
+    select * from users where birthday is null;
+
+    -- null is the biggest by default
+    select * from users order by birthday desc limit 10;
+
+    -- change it explicitly
+    -- no index, Parallel Seq Scan
+    explain select * from users order by birthday desc nulls last limit 10;
+    explain select * from users order by birthday asc nulls first limit 10;
+
+    -- create a index
+    create index birthday_null_first on users(birthday ASC NULLS FIRST);
+
+    -- Then after index created, index scan, both of them
+    explain select * from users order by birthday asc nulls first limit 10;
+    -- Index Scan Backward
+    explain select * from users order by birthday desc nulls last limit 10;
+
+    -- Even these two are Index Scan
+    -- Index Scan
+    explain select * from users order by birthday asc nulls last limit 10;
+    -- Index Scan Backward
+    explain select * from users order by birthday desc nulls first limit 10;
+```
+
+### 53. Functional indexes ###
+```sql
+    select email, split_part(email, '@', 2) from users limit 10;
+
+    -- Create index for function, remember to use extra ()
+    create index domain on users((split_part(email, '@', 2)));
+
+    -- using Index Scan
+    explain select * from users where split_part(email, '@', 2) = 'tech.dev' limit 10;
+
+    create index lower_email on users((lower(email)));
+    -- Parallel Seq Scan
+    explain select * from users where email='charles.ramirez485@gmail.com';
+    -- Bitmap Index Scan
+    explain select * from users where lower(email)='charles.ramirez485@gmail.com';
+```
+
+### 54. Duplicate indexes ###
+- You have a index like
+```sql
+    create index email on users (email);
+```
+
+- And along with business change, you decide to add a new one with email and is_pro
+```sql
+    create index email_is_pro on users (email, is_pro);
+```
+
+- In this case, the second one `email_is_pro` can safely replace the first one `email`, since left most rule.
+- The first one can safely deleted.
+
+### 55. Hash indexes ###
+- Hash indexes is only use for *strictly equality lookups*
+- Prior postgre 10, *DO NOT* use this.
+```sql
+    create index email_btree on users using btree(email);
+    create index email_hash on users using hash(email);
+
+    -- Index Scan using email_hash, faster than btree
+    explain select * from users where email='paul.brown353520@mail.com';
+
+    -- Parallel Seq Scan
+    explain select * from users where email like 'paul.brown35%';
+```
