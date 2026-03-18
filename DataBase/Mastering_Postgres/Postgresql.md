@@ -675,3 +675,188 @@ select * from users;
     -- Parallel Seq Scan
     explain select * from users where email like 'paul.brown35%';
 ```
+
+### 56. Nameing indexes ###
+- Index naming not global to a database, but global for a schema
+    - Not same index name in one schema
+
+- Pattern
+    - {tablename}_{column(s)}_{(type)e.g.uqniue/idx/check}
+    ```sql
+        create index users_email_idx on users(email);
+    ```
+
+### 57. Introduction to Explain ###
+### 58. Explain structure ###
+- Not read the explain results from top to bottom,
+    - The very *first* line is in fact the very *last* thing should read
+    - read from *inside out moving up*, from the children nodes to parent nodes, all the way up
+
+- explain plan is a tree plan that is made up of nodes
+```sql
+    explain (format json) select * from users limit 10;
+```
+// output, tree structure
+[
+  {
+    "Plan": {
+      "Node Type": "Limit",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 0.00,
+      "Total Cost": 0.38,
+      "Plan Rows": 10,
+      "Plan Width": 81,
+      "Plans": [
+        {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Relation Name": "users",
+          "Alias": "users",
+          "Startup Cost": 0.00,
+          "Total Cost": 37319.08,
+          "Plan Rows": 989908,
+          "Plan Width": 81
+        }
+      ]
+    }
+  }
+]
+
+```sql
+    explain select * from users where first_name = 'Kimberly' limit 10;  -- maybe check the json version
+```
+![alt text](image-3.png)
+- --> (arrow) meaning new node.
+- only indentation doesn't mean it's a new node, maybe something worth to notice, like filter
+
+### 59. Scan nodes ###
+- Seq Scan, *worst*
+    - read the entire table in physical order, page by page, line by line.
+
+- Bitmap Index Scan
+    - scans the index, produces a *map*, then reads pages in physical order to prevent that random IO
+
+- Index Scan
+    - Scan the index, get the row.
+    - Doesn't care the IO penalty anymore, since the final results are really small, it will use the index get the result, random scan.
+
+```sql
+    -- check if we have a email_btree index already created
+    select * from pg_indexes where tablename='users';
+
+    -- return "CREATE INDEX email_btree ON public.users USING btree (email)"
+    -- yes, already created
+
+    -- Bitmap Index Scan goes first, using email_btree index
+    -- but the results still have a lot of record.
+    -- Then Bitmap Heap Scan kick in, put them in physical order and scan and recheck the condition.
+    explain select * from users where email < 'b';
+
+    -- Index Scan
+    explain select * from users where email = '"anthony.jones353568@yandex.com"';
+
+    -- Index Only Scan, no need to touch heap, use index only (fast)
+    explain select email from users where email = '"anthony.jones353568@yandex.com"';
+```
+
+- So in short:
+    - the number of results, the children query emit to the upper level will decide which scan method will be used.
+
+### 60. Costs and rows ###
+```sql
+    explain (format json) select id from users limit 10;
+```
+
+- Result json from upper command,
+```json
+[
+  {
+    "Plan": {
+      "Node Type": "Limit",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 0.00,
+      "Total Cost": 0.38,
+      "Plan Rows": 10,
+      "Plan Width": 8,
+      "Plans": [
+        {
+          "Node Type": "Seq Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Relation Name": "users",
+          "Alias": "users",
+          "Startup Cost": 0.00,    -- how many units I need to wait before this query start
+          "Total Cost": 37319.08,  -- total units the query cost
+          "Plan Rows": 989908,
+          "Plan Width": 8           -- how wide, in bytes, for each row
+        }
+      ]
+    }
+  }
+]
+```
+- Plan Width: 8, since only select the id of the users table, id is *bigint*, which is *8 bytes*.
+
+### 61. Explain analyze ###
+- Explain select query is *estimate*
+- expalin analyze 
+    - it will run the query to get the accurate info of the query.
+
+```sql
+    explain analyze select * from users where email < 'b';
+```
+![alt text](image-4.png)
+
+- if you want to only show the actual time
+```sql
+    explain (analyze, costs off)  select * from users where email < 'b';
+```
+
+- Also you can have the json version
+```sql
+    explain (analyze, format json, costs off) select * from users where email < 'b';
+```
+```json
+[
+  {
+    "Plan": {
+      "Node Type": "Bitmap Heap Scan",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Relation Name": "users",
+      "Alias": "users",
+      "Actual Startup Time": 11.895,
+      "Actual Total Time": 30.117,
+      "Actual Rows": 73994,
+      "Actual Loops": 1,
+      "Recheck Cond": "(email < 'b'::text)",
+      "Rows Removed by Index Recheck": 0,
+      "Exact Heap Blocks": 14148,
+      "Lossy Heap Blocks": 0,
+      "Plans": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Index Name": "email_btree",
+          "Actual Startup Time": 9.555,
+          "Actual Total Time": 9.555,
+          "Actual Rows": 73994,
+          "Actual Loops": 1,
+          "Index Cond": "(email < 'b'::text)"
+        }
+      ]
+    },
+    "Planning Time": 0.185,
+    "Triggers": [
+    ],
+    "Execution Time": 31.823
+  }
+]
+```
