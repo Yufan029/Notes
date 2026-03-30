@@ -860,3 +860,492 @@ select * from users;
   }
 ]
 ```
+
+### 62. Introduction to queries ###
+### 63. Inner joins ###
+- default join
+    - inner join
+### 64. Outer joins ###
+### 65. Subqueries ###
+```sql
+    -- create function index
+    create index user_id_bookmarks_secure_url on bookmarks(user_id, (starts_with(url, 'https')));
+
+    select first_name, url
+    from
+        users left join (
+            select * from bookmarks where starts_with(url, 'https') is true
+        ) as bookmarks_secure on user.id = bookmarks_secure.user_id
+    limit 
+        10;
+```
+
+### 66. Lateral joins ###
+- When the inner query reference the outter table, you need to use lateral
+    - Can be left lateral, right lateral, full lateral
+```sql
+    select
+        *
+    from
+        users left join lateral (
+            select * from bookmarks where user_id = users.id order by id desc limit 1
+        ) as most_recent_bookmark on true
+    limit 10;
+```
+
+### 67. ROWS FROM ###
+- If you want to put list side by side *without* joining, since join can create two much rows, we only want side by side, this feature can help
+
+```sql
+    select * from generate_series(1, 10);
+    select * from generate_series(101, 111);
+
+    select * from rows from (
+        generate_series(1, 10),
+        generate_series(101, 111)
+    ) as t(lower, upper)
+
+    select date::date, num from rows from (
+        generate_series('2026-01-01'::date, '2026-12-31'::date, '1 day'),
+        generate_series(1, 370)
+    ) as t(date, num)
+    where date is not null
+
+    select * from rows from (
+        unnest(array[101, 102, 103]),
+        unnest(array['Laptop', 'Smartphone', 'Tablet']),
+        unnest(array[999.99, 499.49, 299.99])
+    ) as combined(product_id, product_name, price)
+```
+
+### 68. Filling gaps in sequences ###
+- Generate the left table to fill the gaps then *left* join the destination table to get the data, and use *coalesce* to set the default value when destination value is null
+```sql
+    select
+        all_dates.sale_date::date, coalesce(total_amount, 0)
+    from 
+        generate_series('2026-01-01'::date, '2026-01-31'::date, '1 day') as all_dates(sale_date)
+        left join (
+            select sale_date, sum(amout) as total_amount from sales group by sale_date
+        ) as sales on sales.sale_date = all_dates.sale_date	
+```
+
+### 69. Subquery elimination ###
+- Sub query has the filter to elimate some of the results then join with other tables
+```sql
+    select users.id, first_name, last_name, ct 
+    from (
+        select user_id, count(*) as ct from bookmarks
+        group by user_id
+        having count(*) > 16
+    ) as bookmark_info
+    inner join users on users.id = bookmark_info.user_id
+    order by ct desc
+```
+
+- Using *exists*, inner query can reference *outter* table.
+    - will shortcircut, the first time when it finds the value.
+```sql
+    select * from users where id in (
+        select user_id from bookmarks group by user_id having count(*) > 16
+    );
+
+    select * from users where exists (
+        select 1 from bookmarks where users.id = user_id group by user_id having count(*) > 16
+    );
+```
+
+- You also can add `explain` to both the upper query, the second will loop a lot times instead of short circuit by exist
+    - because the `group by` clause, it will need to loop all the rows to get the results.
+
+
+### 70. Combining queires ###
+- union
+    - get rid of the duplicated rows
+
+- union all
+    - all, include duplicated records
+
+- intersect
+- intersect all
+
+- except
+- except all
+
+### 71. Set generating functions ###
+```sql
+    select generate_series('2026-03-01'::date, '2026-03-31'::date, '1 day')::date as date;
+
+    select unnest(ARRAY[1, 2, 3, 4, 5]) as tag;
+
+    select * from json_to_recordset('[
+        {"id":1, "name":"Alice", "email": "alice@example.com"},
+        {"id":2, "name":"Bob", "email": "bob@example.com"}
+    ]') as t(id int, name text, email text)
+
+    select * from jsonb_to_recordset('[
+        {"id":1, "name":"Alice", "email": "alice@example.com"},
+        {"id":2, "name":"Bob", "email": "bob@example.com"}
+    ]'::jsonb) as t(id int, name text, email text)
+
+    select regexp_matches('The quick brown fox jumps over the lazy dog', '\m\w{4}\M', 'g') as match;
+    select regexp_matches('Name: Alice, Age: 30; Name: Bob, Age: 25', 'Name: (\w+), Age: (\d+)', 'g') as match;
+
+    select string_to_table('apple, banana, cherry', ',') AS fruit;
+```
+
+### 72. Indexing joins ###
+```sql
+    create table states (
+        id bigint generated always as identity primary key,
+        name text
+    )
+
+    create table cities (
+        id bigint generated always as identity primary key,
+        state_id bigint references states(id),
+        name text
+    )
+
+    -- we can tell that after creating the table, the cities forigen key doesn't have index being created automatically
+    select * from pg_indexes where tablename='states'
+    select * from pg_Indexes where tablename='cities'
+```
+
+```sql
+    -- users use the index scan, but the bookmarks use the Seq Scan.
+    explain select * from users join bookmarks on bookmarks.user_id = users.id where users.id < 100;
+
+    create index fk_bookmarks_user_id on bookmarks(user_id);
+    -- Then run the previous query, we can get an Index Scan for the bookmarks table as well.
+```
+
+### 73. Introduction to advanced SQL ###
+### 74. Cross joins ###
+- Cartesian product
+- select from two tables, 
+    - first table 5 rows,
+    - seconde table 5 rows, 
+    - The result is 25 rows.
+
+```sql
+    select * from letters cross join numbers;
+
+    -- cross join can be omit
+    select * from letters, numbers
+
+    select  
+	    chr(letter) || n
+    from
+        generate_series(1, 5) n,
+        generate_series(65, 70) as t(letter);
+```
+
+### 75. Grouping ###
+```sql
+    select 
+        count(*) FILTER (where sales.is_returned is true) as returned_sales
+    from
+        sales
+    group by 
+        sales.employee_id
+```
+
+### 76. Grouping sets, rollups, cubes ###
+- grouping sets
+```sql
+    select
+        employee_id, region, sum(amout)
+    from 
+        sales
+    group by 
+        grouping sets ((employee_id), (region), ())
+```
+
+- rollup, is implemented by grouping sets under the hood
+```sql
+    select
+        employee_id, region, sum(amout)
+    from 
+        sales
+    group by 
+        rollup (region, employee_id)
+    
+    -- which equals to 
+        grouping sets (
+            (region, employee_id),
+            (region),
+            ()
+        )
+```
+
+- cube, every possible combination.
+```sql
+    select
+        employee_id, region, sum(amout)
+    from 
+        sales
+    group by 
+        cube(employee_id, region)
+    
+    -- which equals to 
+        grouping sets(
+            (employee_id, region),
+            (employee_id),
+            (region),
+            ()
+        )
+```
+
+### 77. Window function ###
+- Work on a sub section of rows, do caluculations over these rows within a partition, preserve all the values in the row
+```sql
+    -- over meanings windows function start
+    select *, avg(amount) over (partition by region) from sales;
+```
+
+### 78. CTE ###
+```sql
+    with tablename1 as (
+
+    ),
+    tablename2 as (
+        select * from tablename1;
+    )
+    select * from tablename2;
+```
+
+### 80. Recursive CTE ###
+- Recurisve CTE
+    1. `recursive` keyword
+    2. anchor condition
+    3. `union` or `union all`
+    4. recursive condition
+    
+```sql
+    with recursive numbers(id, a, b) as (
+        select 1, 0, 1
+        union all
+        select id + 1, b, a + b from numbers where id < 20
+    )
+
+    select id, a as fib from numbers;
+```
+
+### 81. Hierarchical recursive CTE ###
+-- set up the database like below
+![alt text](image-5.png)
+
+```sql
+    WITH RECURSIVE category_tree AS (
+        SELECT id, name, name as path, 1 AS level 
+        FROM categories
+        WHERE parent_id IS NULL
+
+        UNION ALL
+
+        SELECT c.id, c.name, concat(path, ' -> ', c.name), ct.level + 1
+        FROM categories c
+        JOIN category_tree ct ON c.parent_id = ct.id
+    )
+    SELECT * FROM category_tree ORDER BY level, id;
+```
+
+### 82. Handling nulls ###
+- nullif(1, 1)
+
+### 83. Row value syntax ###
+- Compare more than one values to more than one values
+```sql
+    -- row as the keyword, can be omit
+    select row(1, 2, 3)
+```
+
+- Compare for compiosite columns
+```sql
+    with date_parts as (
+        select 
+            extract(year from gs.date) as year,
+            extract(month from gs.date) as month,
+            extract(day from gs.date) as day
+        from
+            generate_series('2026-01-01'::date, '2026-12-31'::date, '1 day') as gs(date)
+    )
+
+    select * from date_parts
+    where (year, month, day) between (2026, 01, 20) and (2026, 03, 03)
+```
+
+### 84. Views ###
+- underlying queries always run for view(*up-to-date*), not for *materialized* view.
+- when coming to search which table to query, *views* schema goes first then *public*
+```sql
+    create view views.users as (
+        select * from public.users
+        union
+        select * from public.users_archive
+    );
+```
+
+### 85. Materialized views ###
+- underlying queries store the data in the dish, as a *cache*
+- like the historical data, there's no need to queries again and again
+```sql
+    refresh materialized view bookmarks_rollup_historic
+```
+
+### 87. Upsert ###
+```sql
+    insert into kv (key, value) values ('cache:foo', 456)
+        on conflict (key) do update set value = excluded.value
+```
+
+### 90 Full text search ###
+- kaggle data set
+    - I use this to import the dataset to postgresql
+        - https://github.com/guenthermi/the-movie-database-import?tab=readme-ov-file
+- like, ilike
+```sql
+    select title, to_tsvector(title) from movies limit 50;
+
+    -- ('star | wars')
+    -- ('star <-> wars') immediately followed, same as <1> 
+    select title from movies where to_tsvector(title) @@ to_tsquery('star & war');
+
+
+    select
+        title,
+        ts_rank(to_tsvector(title), to_tsquery('star & (war | trek)')) as rank	-- need to include conditions as well, statement in where clause
+    from
+        movies
+    where
+        to_tsvector(title) @@ to_tsquery('star & (war | trek)')
+    order by
+        rank desc
+    limit
+        50;
+```
+
+```sql
+    select
+        -- like search in the google, "" means exact match
+        websearch_to_tsquery('"star wars" -clone') as web, 
+        plainto_tsquery('star wars') as plain,
+        phraseto_tsquery('star wars') as phrase;
+```
+
+### 97 Json ###
+- JSONB
+  - parsed then store in the disc.
+  - more faster when retrieve
+  - bit overhead, since need 
+
+- Validating JSON
+```sql
+    select
+        val, 
+        val is json as json,
+        val is json scalar as scalar,
+        val is json array as "is array",
+        val is json object as "is object",
+        val is json object with unique keys as obj_uni
+    from 
+        (
+            values
+                ('123'),
+                ('"abc"'),
+                ('abc'),
+                ('{"a": "b"}'),
+                ('{a: "b"}'),
+                ('[1, 2]'),
+                ('{"a": "b", "a": "2"}')
+        ) as test(val)
+```
+
+- Creating json
+```sql
+    select json_build_object(
+        'id', 123, 'name', 'Alice', 'active', true, 'roles', array['admin', 'editor']
+    ) as user_info;
+
+    json_build_array
+    to_json
+    row_to_json
+
+    select 
+        json_agg(
+            json_build_object('id', id, 'email', email)
+        ) as user_json
+    from
+        users
+    where
+        is_pro is true
+```
+
+- Extract from json
+    - '->', '->>', '#>', '#>>'
+    - jsonb_path_query
+
+- Contain
+    - '@>', '?', '?|', '?&'
+
+- jsonb_set / jsonb_insert
+
+### 106 Indexing JSON parts ###
+- b-tree index
+    - Create the index in json itself or create a new generated column then create the index for the newly generated column
+    - Recursive CTE can be used for generating new repetitive data.
+    - Genreated column cannot be edit
+
+- GIN index
+    - inverted index, better in *containment* `@>`, *key exist* kind of thing.
+    - more expensive.
+    - longger to update, big size.
+
+- When creating index, you need to thing about you use case.
+    - index a single thing, best bet => b-tree
+    - index entire json blob, 
+        - GIN index
+            - jsonb_ops => less flexibility
+            - jsonb_path_ops => not great for containment
+
+
+### 108. pgvector ###
+- pgvector is extension of postgresql
+- pgvector help with store and query against vector embeddings.
+
+- Vector embedding?
+    - long array floating numbers 
+
+```sql
+    create extension if not exists vector;
+
+    create table procuts_v (
+        id bigint generated always as identity primary key,
+        name text,
+        embedding vector(4)
+    )
+
+    insert into products_v(name, embedding) values
+    ('Product A', '[1, 2, 3, 4]'),
+    ('Product B', '[10, 11, 12, 13]')
+
+    select * from products_v;
+
+    select *, embedding<->'[1, 2, 3, 4]' from products_v;      -- <-> calculate the distances of column embeddings to [1, 2, 3, 4]
+    select *, embedding<->'[1, 2, 6, 4]' from products_v;
+```
+
+```sql
+    -- order by most related articles to 18, exclude 18 itselves.
+    select * from articles where id != 18 order by embedding <-> (select embedding from articles where id = 18);
+```
+
+- L2 operator <->
+- Cosine <=>
+- L1 <+>
+- Inner product <#>
+
+- Index for vector **can** change the query results!!!
+ - ivfflat
+ - hnsw (better accuracy, better performance, but expensive)
