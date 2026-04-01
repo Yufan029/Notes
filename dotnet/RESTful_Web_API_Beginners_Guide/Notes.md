@@ -16,3 +16,9 @@
             }
         ```
     - automapper
+
+- Update check the duplicated name
+    - return Conflict("existing name"); // 409
+
+- Always returning DTO, not entity returned
+- Global ApiResponse return for every endpoint

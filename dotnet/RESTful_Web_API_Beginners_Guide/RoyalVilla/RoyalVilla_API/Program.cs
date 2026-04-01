@@ -14,6 +14,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddAutoMapper(o =>
 {
     o.CreateMap<Villa, VillaCreateDTO>().ReverseMap();
+    o.CreateMap<Villa, VillaUpdateDTO>().ReverseMap();
+    o.CreateMap<Villa, VillaDTO>().ReverseMap();
 });
 
 builder.Services.AddControllers();
