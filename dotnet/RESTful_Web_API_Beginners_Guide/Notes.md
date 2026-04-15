@@ -22,3 +22,5 @@
 
 - Always returning DTO, not entity returned
 - Global ApiResponse return for every endpoint
+
+- ProducesResponseType attribute for controller, to let the scalar know what type of data returned
