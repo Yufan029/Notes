@@ -11,7 +11,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddAutoMapper(o =>
 {
     o.CreateMap<Villa, VillaCreateDTO>().ReverseMap();
-    o.CreateMap<Villa, VillaUpdateDTO>().ReverseMap();
+    o.CreateMap<VillaDTO, VillaUpdateDTO>().ReverseMap();
 });
 
 builder.Services.AddHttpClient("RoyalVillaAPI", client =>
